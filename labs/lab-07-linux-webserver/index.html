@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portofolio Praktikan DevOps - Modul 7</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; line-height: 1.6; }
+        header { background: #1e293b; padding: 60px 20px; text-align: center; border-bottom: 2px solid #3b82f6; }
+        header h1 { font-size: 2.4rem; color: #60a5fa; margin-bottom: 10px; }
+        header p { font-size: 1.1rem; color: #94a3b8; }
+        .badge { display: inline-block; margin-top: 15px; background: #10b981; color: white; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .card { background: #1e293b; padding: 25px; border-radius: 10px; border: 1px solid #334155; }
+        .card h2 { color: #38bdf8; font-size: 1.3rem; margin-bottom: 10px; }
+        .card p { color: #cbd5e1; font-size: 0.95rem; }
+        footer { text-align: center; padding: 40px 20px; color: #64748b; font-size: 0.85rem; border-top: 1px solid #1e293b; margin-top: 60px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Platform Web Server Nginx</h1>
+        <p>Modul 7: Dasar Linux Server dan Web Server Nginx</p>
+        <div class="badge">Web Server: Nginx Active & Running</div>
+    </header>
+
+    <div class="container">
+        <div class="card-grid">
+            <div class="card">
+                <h2>Linux Server (WSL2)</h2>
+                <p>Berjalan di lingkungan virtualisasi Ubuntu WSL2 dengan kontrol service berbasis <code>systemctl</code>.</p>
+            </div>
+            <div class="card">
+                <h2>Nginx Master & Worker</h2>
+                <p>Mengadopsi pemrosesan <em>event-driven asynchronous</em> berkinerja tinggi untuk melayani berkas HTML statis.</p>
+            </div>
+            <div class="card">
+                <h2>Virtual Host (Server Block)</h2>
+                <p>Dikonfigurasi melalui <code>/etc/nginx/sites-available/default</code> mengarahkan <em>document root</em> ke direktori web.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Tim Pelatihan Internal DevOps. Modul 7 Dasar Linux & Web Server.</p>
+    </footer>
+</body>
+</html>

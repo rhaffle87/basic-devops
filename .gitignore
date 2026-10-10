@@ -12,6 +12,8 @@ desktop.ini
 # Logs & Temporary files
 *.log
 deployment.log
+__pycache__/
+*.py[cod]
 
 # SSL Key and Certificate (Lab runtime generated)
 labs/lab-11-reverse-proxy/certs/*.key

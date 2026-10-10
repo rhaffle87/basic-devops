@@ -1,5 +1,10 @@
 import os
+import sys
 from PIL import Image, ImageDraw, ImageFont
+
+# Set working directory ke root repositori agar path assets/ selalu konsisten
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(REPO_ROOT)
 
 def render_terminal(output_path, title, lines, width=960, min_height=380):
     font_title = ImageFont.truetype('arial.ttf', 13)
@@ -523,6 +528,98 @@ def render_github_actions_mock(output_path, status='success'):
             draw.text((865, y), s_dur, fill='#8b949e', font=font_p)
         y += 28
         
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    img.save(output_path)
+    print(f'Generated: {output_path}')
+
+def render_github_packages_mock(output_path, width=960, height=420):
+    font_title = ImageFont.truetype('arialbd.ttf', 16)
+    font_h2 = ImageFont.truetype('arialbd.ttf', 15)
+    font_p = ImageFont.truetype('arial.ttf', 13)
+    font_bold = ImageFont.truetype('arialbd.ttf', 12)
+    font_code = ImageFont.truetype('consola.ttf', 13)
+
+    img = Image.new('RGB', (width, height), color='#0d1117')
+    draw = ImageDraw.Draw(img)
+
+    # Header bar
+    draw.rectangle([(0, 0), (width, 60)], fill='#161b22', outline='#30363d')
+    draw.text((25, 20), 'Packages', fill='#f0f6fc', font=font_title)
+    draw.text((115, 22), '/ rhaffle87', fill='#8b949e', font=font_p)
+
+    # Package card
+    draw.rectangle([(25, 80), (width - 25, 220)], fill='#161b22', outline='#30363d')
+    draw.rounded_rectangle([(45, 100), (105, 150)], radius=6, fill='#1f6feb')
+    draw.text((50, 118), 'DOCKER', fill='#ffffff', font=font_bold)
+
+    # Package Info
+    draw.text((120, 100), 'ghcr.io/rhaffle87/my-devops-cicd', fill='#58a6ff', font=font_h2)
+    draw.text((120, 128), 'Docker container image diterbitkan secara otomatis oleh pipeline GitHub Actions.', fill='#8b949e', font=font_p)
+    
+    # Tags & metadata
+    draw.rounded_rectangle([(120, 160), (180, 185)], radius=12, fill='#21262d', outline='#30363d')
+    draw.text((130, 164), 'latest', fill='#3fb950', font=font_bold)
+
+    draw.rounded_rectangle([(190, 160), (260, 185)], radius=12, fill='#21262d', outline='#30363d')
+    draw.text((200, 164), '5d12a8b', fill='#8b949e', font=font_bold)
+
+    draw.text((280, 165), 'Published 2 minutes ago by @rhaffle87 \u2022 Public Registry', fill='#8b949e', font=font_p)
+
+    # CLI Pull command snippet box
+    draw.rectangle([(25, 250), (width - 25, 340)], fill='#161b22', outline='#30363d')
+    draw.text((45, 265), 'Pull this package from the command line:', fill='#f0f6fc', font=font_bold)
+    draw.rectangle([(45, 290), (width - 45, 325)], fill='#0d1117', outline='#30363d')
+    draw.text((55, 298), 'docker pull ghcr.io/rhaffle87/my-devops-cicd:latest', fill='#79c0ff', font=font_code)
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    img.save(output_path)
+    print(f'Generated: {output_path}')
+
+def render_browser_ssl_warning(output_path, width=960, height=480):
+    font_title = ImageFont.truetype('arial.ttf', 13)
+    font_url = ImageFont.truetype('arial.ttf', 13)
+    font_h1 = ImageFont.truetype('arialbd.ttf', 22)
+    font_p = ImageFont.truetype('arial.ttf', 14)
+    font_btn = ImageFont.truetype('arialbd.ttf', 13)
+    font_code = ImageFont.truetype('consola.ttf', 12)
+
+    img = Image.new('RGB', (width, height), color='#ffffff')
+    draw = ImageDraw.Draw(img)
+
+    # Browser chrome header
+    draw.rectangle([(0, 0), (width, 70)], fill='#dee1e6')
+    draw.ellipse([(14, 14), (24, 24)], fill='#ff5f56')
+    draw.ellipse([(32, 14), (42, 24)], fill='#ffbd2e')
+    draw.ellipse([(50, 14), (60, 24)], fill='#27c93f')
+
+    # Tab
+    draw.rectangle([(90, 8), (280, 38)], fill='#ffffff')
+    draw.text((105, 14), 'Privacy error', fill='#3c4043', font=font_title)
+
+    # URL bar with Not Secure / Red badge
+    draw.rectangle([(80, 42), (width - 30, 64)], fill='#ffffff', outline='#dadce0')
+    draw.rectangle([(85, 45), (175, 61)], fill='#fce8e6', outline='#fad2cf')
+    draw.text((90, 47), '\u26a0 Not secure', fill='#c5221f', font=font_title)
+    draw.text((185, 45), 'https://localhost', fill='#3c4043', font=font_url)
+
+    # Warning text
+    draw.text((80, 140), 'Your connection is not private', fill='#202124', font=font_h1)
+    draw.text((80, 180), 'Attackers might be trying to steal your information from localhost (for example, passwords, messages, or credit cards).', fill='#5f6368', font=font_p)
+    draw.text((80, 220), 'NET::ERR_CERT_AUTHORITY_INVALID', fill='#5f6368', font=font_code)
+
+    # Buttons
+    # Advanced Button
+    draw.rectangle([(80, 280), (180, 316)], fill='#ffffff', outline='#dadce0')
+    draw.text((100, 290), 'Advanced', fill='#1a73e8', font=font_btn)
+
+    # Back to safety button
+    draw.rectangle([(width - 200, 280), (width - 60, 316)], fill='#1a73e8')
+    draw.text((width - 175, 290), 'Back to safety', fill='#ffffff', font=font_btn)
+
+    # Explanation text for Advanced
+    draw.text((80, 340), 'This server could not prove that it is localhost; its security certificate is not trusted by your operating system.', fill='#5f6368', font=font_p)
+    draw.text((80, 370), '\u2192 Proceed to localhost (unsafe)', fill='#1a73e8', font=font_btn)
+
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     img.save(output_path)
     print(f'Generated: {output_path}')
