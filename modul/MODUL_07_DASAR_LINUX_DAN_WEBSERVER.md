@@ -104,59 +104,67 @@ Tabel berikut merangkum seluruh perintah baris perintah (*Command Line Interface
 
 ### 4. Langkah-Langkah Praktikum
 
-#### a. Instalasi dan Persiapan WSL Ubuntu
-1. Buka **Command Prompt (CMD)** atau **PowerShell** pada Windows dengan memilih **Run as administrator**.
-2. Jalankan perintah instalasi WSL:
-   ```cmd
-   wsl --install
-   ```
-   *Jika WSL sudah terpasang, pastikan distribusi default adalah Ubuntu dengan perintah `wsl --install -d Ubuntu`.*
-3. Setelah proses instalasi selesai, sistem akan meminta pembuatan **username** dan **password** untuk akun Ubuntu Anda.
-4. Catat username dan password tersebut, karena akan digunakan saat menjalankan perintah `sudo`.
-5. Anda akan langsung masuk ke sesi terminal Ubuntu Linux:
-   ```text
-   user@LAPTOP-NAME:~$
-   ```
+#### a. Install WSL
+1. Buka CMD di laptop masing-masing.
+   
+   ![Membuka Command Prompt Windows](../assets/modul-07/01_buka_cmd.png)
+   *Gambar 2. Tampilan Command Prompt Windows.*
 
-#### b. Instalasi Nginx dan Git
-1. Perbarui daftar pustaka paket repository Ubuntu:
-   ```bash
-   sudo apt update && sudo apt upgrade -y
-   ```
-2. Pasang paket web server Nginx:
-   ```bash
-   sudo apt install nginx -y
-   ```
-3. Jalankan service Nginx:
-   ```bash
-   sudo service nginx start
-   ```
-   *Atau jika sistem mendukung systemd:*
-   ```bash
-   sudo systemctl start nginx
-   ```
-4. Verifikasi status operasional layanan Nginx:
-   ```bash
-   sudo systemctl status nginx
-   ```
-   *Pastikan terdapat indikator status berwarna hijau: `Active: active (running)`.*
-5. Cek alamat IP lokal pada antarmuka jaringan WSL:
-   ```bash
-   ip -c a
-   ```
-   *Perhatikan alamat IPv4 pada baris antarmuka `eth0`.*
-6. Buka web browser di Windows dan akses `http://localhost`. Halaman default bertuliskan **Welcome to nginx!** akan tampil.
-7. Pasang paket Git:
-   ```bash
-   sudo apt install git -y
-   ```
-8. Periksa verifikasi versi Git yang terpasang:
-   ```bash
-   git --version
-   ```
+2. Pada CMD jalankan `wsl --install`.
+   
+   ![Menjalankan Perintah WSL Install](../assets/modul-07/02_wsl_install.png)
+   *Gambar 3. Proses instalasi Ubuntu WSL.*
 
-#### c. Deployment Website Portofolio dan Konfigurasi Nginx
-1. Pindah ke direktori web server default:
+3. Setelah berhasil menginstall wsl-ubuntu, Anda akan diminta untuk membuat user dan password dari Ubuntu.
+   
+   ![Membuat Username dan Password](../assets/modul-07/03_wsl_buat_user.png)
+   *Gambar 4. Pembuatan akun pengguna Ubuntu.*
+
+4. Setelah itu akan masuk langsung ke Ubuntu menandakan Ubuntu berhasil diinstal.
+   
+   ![Masuk ke Terminal Ubuntu WSL](../assets/modul-07/04_masuk_ubuntu.png)
+   *Gambar 5. Tampilan sesi shell terminal Ubuntu.*
+
+#### b. Install Nginx dan Git
+1. Buka Ubuntu, dan jalankan `sudo apt update && sudo apt upgrade -y` untuk memperbarui package repository Linux dalam kondisi terbaru.
+   
+   ![Update dan Upgrade Paket Linux](../assets/modul-07/05_apt_update_upgrade.png)
+   *Gambar 6. Proses sinkronisasi repositori dan pembaruan paket.*
+
+2. Selanjutnya jalankan `sudo apt install nginx -y` untuk melakukan install Nginx.
+   
+   ![Instalasi Nginx Web Server](../assets/modul-07/06_apt_install_nginx.png)
+   *Gambar 7. Pemasangan paket Nginx.*
+
+3. Setelah Nginx terinstall, jalankan service Nginx dengan `sudo service nginx start` atau `sudo systemctl start nginx`.
+   
+   ![Menjalankan Layanan Nginx](../assets/modul-07/07_service_nginx_start.png)
+   *Gambar 8. Menjalankan service Nginx.*
+
+4. Setelah Nginx dijalankan, cek status dari Nginx dengan `sudo systemctl status nginx` dan akan muncul indikator `active (running)`.
+   
+   ![Verifikasi Status Service Nginx Active](../assets/modul-07/08_systemctl_status_nginx.png)
+   *Gambar 9. Status operasional layanan Nginx.*
+
+5. Untuk mengecek lebih lanjut apakah Nginx sudah berjalan, kita bisa cek melalui browser dengan IP lokal dari WSL kita. Jalankan `ip -c a` untuk mengecek IP (cek pada antarmuka `eth0`).
+   
+   ![Pemeriksaan Alamat IP eth0](../assets/modul-07/09_ip_c_a.png)
+   *Gambar 10. Menampilkan alamat IP WSL.*
+
+6. Buka peramban web di Windows dan akses `http://localhost` untuk memastikan Nginx telah melayani halaman web.
+   
+   ![Halaman Welcome to Nginx di Browser](../assets/modul-07/10_browser_welcome_nginx.png)
+   *Gambar 11. Halaman selamat datang default Nginx.*
+
+7. Selanjutnya install Git dengan menjalankan `sudo apt install git -y`.
+   
+   ![Instalasi Paket Git](../assets/modul-07/11_apt_install_git.png)
+   *Gambar 12. Pemasangan Git.*
+
+8. Cek apakah Git sudah terinstall dengan menjalankan `git --version`.
+
+#### c. Konfigurasi Webserver
+1. Konfigurasi website menggunakan HTML/CSS. Masuk ke direktori web server:
    ```bash
    cd /var/www/html
    ```
@@ -164,43 +172,42 @@ Tabel berikut merangkum seluruh perintah baris perintah (*Command Line Interface
    ```bash
    sudo git clone https://github.com/faizan-ahmad5/Portfolio-responsive
    ```
-3. Periksa keberadaan folder hasil unduhan:
+   ![Download Website via Git Clone](../assets/modul-07/12_git_clone_portfolio.png)
+   *Gambar 13. Mengunduh source code website portofolio.*
+
+3. Setelah berhasil terdownload, cek dengan menjalankan `ls`, folder `Portfolio-responsive` akan tampil.
+   
+   ![Verifikasi Direktori Hasil Unduhan](../assets/modul-07/13_ls_portfolio.png)
+   *Gambar 14. Daftar berkas dalam /var/www/html.*
+
+4. Masuk ke direktori konfigurasi virtual host Nginx:
    ```bash
-   ls -la
+   cd /etc/nginx/sites-available/
    ```
-   *Folder `Portfolio-responsive` akan muncul di dalam `/var/www/html/`.*
-4. Buka direktori konfigurasi situs Nginx:
-   ```bash
-   cd /etc/nginx/sites-available
-   ls
-   ```
-5. Edit file konfigurasi situs default menggunakan editor `nano`:
+5. Buka file default untuk konfigurasi Nginx:
    ```bash
    sudo nano default
    ```
-6. Temukan blok direktif `root`:
-   ```nginx
-   # Konfigurasi Awal:
-   root /var/www/html;
-   index index.html index.htm index.nginx-debian.html;
-   ```
-7. Ubah path direktif `root` agar mengarah ke folder proyek portofolio:
-   ```nginx
-   # Konfigurasi Baru:
-   root /var/www/html/Portfolio-responsive;
-   index index.html index.htm;
-   ```
+   ![Membuka File Default pada Teks Editor Nano](../assets/modul-07/14_nano_default_awal.png)
+   *Gambar 15. Tampilan awal file konfigurasi default Nginx.*
+
+6. Cari baris direktif `root /var/www/html;` yang mengatur path default document root web server.
+   
+   ![Direktif Root Awal](../assets/modul-07/15_root_default_awal.png)
+   *Gambar 16. Direktif root bawaan Nginx.*
+
+7. Ubah direktif `root` agar mengarah ke folder proyek `Portfolio-responsive`:
+   
+   ![Mengubah Root ke Folder Portfolio-responsive](../assets/modul-07/16_root_default_portfolio.png)
+   *Gambar 17. Konfigurasi root baru mengarah ke folder portofolio.*
+
 8. Simpan perubahan dengan menekan `Ctrl + O`, tekan `Enter`, lalu keluar dengan `Ctrl + X`.
-9. Uji keabsahan sintaks konfigurasi Nginx:
-   ```bash
-   sudo nginx -t
-   ```
-   *Pastikan muncul pesan `syntax is ok` dan `test is successful`.*
-10. Muat ulang layanan Nginx agar konfigurasi baru aktif:
+9. Jalankan `sudo nginx -t` untuk memeriksa sintaks konfigurasi Nginx. Pastikan respon bernilai `syntax is ok` dan `test is successful`.
+10. Terapkan konfigurasi baru dengan merestart Nginx:
     ```bash
     sudo systemctl restart nginx
     ```
-11. Buka kembali browser di Windows, bersihkan cache dengan menekan `Ctrl + F5`, dan akses `http://localhost`. Tampilan website portofolio kini aktif.
+11. Buka kembali browser di Windows pada `http://localhost`, dan website portofolio kini aktif tampil.
 
 ---
 

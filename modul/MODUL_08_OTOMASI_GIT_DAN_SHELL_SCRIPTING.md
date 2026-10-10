@@ -115,40 +115,26 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah Linux dan auto
    ```bash
    git config user.name "Praktikan DevOps"
    git config user.email "praktikan@lab.local"
+   git status
    ```
-5. Buat file `index.html` sebagai artefak aplikasi web:
+   ![Inisialisasi Git Repository](../assets/modul-08/01_git_init_status.png)
+   *Gambar 2. Output inisialisasi Git dan pengaturan identitas lokal.*
+
+5. Buat file `index.html` sebagai artefak aplikasi web menggunakan editor `nano`:
    ```bash
-   cat << 'EOF' > index.html
-   <!DOCTYPE html>
-   <html lang="id">
-   <head>
-       <meta charset="UTF-8">
-       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       <title>DevOps Training Lab</title>
-       <style>
-           body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0f172a; color: #f8fafc; text-align: center; padding-top: 80px; }
-           .container { background: #1e293b; display: inline-block; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 1px solid #334155; }
-           h1 { margin-bottom: 8px; color: #38bdf8; }
-           .version-badge { background-color: #0284c7; color: white; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
-           .status-box { margin-top: 25px; padding: 12px; background: #0f172a; border-radius: 8px; font-family: monospace; font-size: 0.85rem; color: #4ade80; border: 1px solid #1e293b; }
-       </style>
-   </head>
-   <body>
-       <div class="container">
-           <h1>Platform Server Pelatihan Internal</h1>
-           <p>Modul 8: Otomasi Git & Shell Scripting</p>
-           <p><span class="version-badge">Rilis: Versi 1.0.0 (Manual)</span></p>
-           <div class="status-box">Status Web Server: Berjalan Normal</div>
-       </div>
-   </body>
-   </html>
-   EOF
+   nano index.html
    ```
-6. Simpan file tersebut ke dalam pencatatan versi Git:
+   ![Editor Nano index.html](../assets/modul-08/02_nano_index_html.png)
+   *Gambar 3. Tampilan editor nano menyusun halaman web versi 1.0.0.*
+
+6. Simpan file tersebut ke dalam pencatatan versi Git dan periksa log:
    ```bash
    git add index.html
    git commit -m "feat: inisialisasi source code website rilis v1.0.0"
+   git log --oneline
    ```
+   ![Git Commit Versi 1.0.0](../assets/modul-08/03_git_commit_v1.png)
+   *Gambar 4. Riwayat commit pertama tercatat di Git log.*
 
 #### 4.2 Integrasi Nginx Virtual Host ke Direktori Proyek
 1. Buka file konfigurasi blok server Nginx:
@@ -162,96 +148,31 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah Linux dan auto
    index index.html index.htm;
    ```
 3. Keluar dan simpan perubahan (`Ctrl + O`, `Enter`, `Ctrl + X`).
-4. Atur hak akses direktori induk agar Nginx (user sistem `www-data`) memiliki izin membaca file:
+4. Atur hak akses direktori induk agar Nginx (user sistem `www-data`) memiliki izin membaca file, lalu uji sintaks dan reload Nginx:
    ```bash
    chmod 755 $HOME
    chmod -R 755 $HOME/web-devops
-   ```
-5. Lakukan uji validasi sintaks konfigurasi Nginx:
-   ```bash
    sudo nginx -t
-   ```
-   *Pastikan terminal menampilkan respon sukses: `syntax is ok` dan `test is successful`.*
-6. Jalankan pembaruan konfigurasi web server:
-   ```bash
    sudo systemctl reload nginx
    ```
-7. Buka browser pada Windows, ketik alamat `http://localhost`, dan verifikasi bahwa halaman web versi 1.0.0 berhasil dirender.
+   ![Uji Sintaks dan Reload Nginx](../assets/modul-08/04_nginx_config_reload.png)
+   *Gambar 5. Validasi konfigurasi Nginx dan reload layanan.*
+
+5. Buka browser pada Windows, ketik alamat `http://localhost`, dan verifikasi bahwa halaman web versi 1.0.0 berhasil dirender.
+   
+   ![Halaman Web v1.0.0 Live](../assets/modul-08/05_browser_v1_live.png)
+   *Gambar 6. Tampilan website rilis versi 1.0.0.*
 
 #### 4.3 Pembuatan Skrip Otomasi Deployment (`deploy.sh`)
 1. Buat file `deploy.sh` pada direktori root proyek:
    ```bash
    nano deploy.sh
    ```
-2. Tuliskan kode otomasi berikut:
-   ```bash
-   #!/bin/bash
-   # ==============================================================================
-   # MODUL 8: AUTOMATED DEPLOYMENT & HEALTH CHECK SCRIPT
-   # ==============================================================================
-   set -eo pipefail
+   ![Menulis Skrip Deploy di Nano](../assets/modul-08/06_nano_deploy_script.png)
+   *Gambar 7. Penyusunan skrip otomatisasi deploy.sh pada nano.*
 
-   PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-   LOG_FILE="$PROJECT_DIR/deployment.log"
-   TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-
-   log_message() {
-       echo "[$TIMESTAMP] $1" | tee -a "$LOG_FILE"
-   }
-
-   echo "======================================================"
-   echo "    MEMULAI SIKLUS OTOMASI DEPLOYMENT APLIKASI WEB    "
-   echo "======================================================"
-
-   # 1. Validasi Keberadaan Direktori dan File Kunci
-   cd "$PROJECT_DIR"
-   if [ ! -f "index.html" ]; then
-       log_message "[FATAL] File index.html tidak ditemukan pada $PROJECT_DIR. Deployment dibatalkan!"
-       exit 1
-   fi
-   log_message "[INFO] Integritas file proyek valid."
-
-   # 2. Verifikasi Hak Akses File Web
-   chmod 644 "$PROJECT_DIR"/index.html
-   log_message "[INFO] Penyesuaian file permission selesai."
-
-   # 3. Uji Sintaks Konfigurasi Nginx
-   echo "[INFO] Menjalankan uji sintaks Nginx (nginx -t)..."
-   if ! sudo nginx -t > /dev/null 2>&1; then
-       log_message "[FATAL] Sintaks Nginx tidak valid! Silakan periksa file konfigurasi."
-       exit 1
-   fi
-   log_message "[INFO] Konfigurasi Nginx terverifikasi valid."
-
-   # 4. Zero-Downtime Reload Service Web Server
-   echo "[INFO] Menerapkan konfigurasi baru ke Nginx..."
-   if sudo systemctl reload nginx; then
-       log_message "[INFO] Service Nginx berhasil dimuat ulang (reload)."
-   else
-       log_message "[FATAL] Gagal me-reload Nginx!"
-       exit 1
-   fi
-
-   # 5. Automated Health Check Menggunakan cURL
-   echo "[INFO] Melakukan HTTP Health Check ke endpoint lokal..."
-   HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ || echo "000")
-
-   if [ "$HTTP_CODE" -eq 200 ]; then
-       COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "non-git")
-       log_message "[SUCCESS] Deployment Berhasil! Status HTTP: $HTTP_CODE | Git Commit: $COMMIT_HASH"
-       echo "======================================================"
-       echo " APLIKASI BERHASIL DIRELOAD & BERJALAN DI http://localhost "
-       echo "======================================================"
-   else
-       log_message "[ERROR] Health check gagal! Mendapatkan HTTP Code: $HTTP_CODE (Ekspektasi: 200)"
-       echo "======================================================"
-       echo " [PERINGATAN] Endpoint tidak mengembalikan status 200 OK!"
-       echo "======================================================"
-       exit 1
-   fi
-   ```
-3. Simpan file (`Ctrl + O`, `Enter`, `Ctrl + X`).
-4. Berikan izin eksekusi pada skrip:
+2. Tuliskan kode otomasi lengkap, lalu simpan file (`Ctrl + O`, `Enter`, `Ctrl + X`).
+3. Berikan izin eksekusi pada skrip:
    ```bash
    chmod +x deploy.sh
    ```
@@ -266,15 +187,24 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah Linux dan auto
    git add index.html
    git commit -m "release: pembaruan aplikasi ke versi 2.0.0"
    ```
-3. Jalankan skrip deployment otomatis:
+3. Jalankan skrip deployment otomatis dengan satu perintah:
    ```bash
    ./deploy.sh
    ```
+   ![Eksekusi Skrip Otomasi Deployment](../assets/modul-08/07_chmod_deploy_run.png)
+   *Gambar 8. Output eksekusi skrip deployment dengan validasi HTTP 200 OK.*
+
 4. Periksa file riwayat log yang dihasilkan:
    ```bash
    cat deployment.log
    ```
-5. Akses kembali browser Windows di `http://localhost` (tekan `Ctrl + F5` untuk membersihkan cache). Halaman web langsung diperbarui ke Versi 2.0.0.
+   ![Verifikasi Audit Log Deployment](../assets/modul-08/08_deploy_log_audit.png)
+   *Gambar 9. Riwayat audit log deployment mencatat timestamp dan commit hash.*
+
+5. Akses kembali browser Windows di `http://localhost` (tekan `Ctrl + F5` untuk membersihkan cache). Halaman web langsung diperbarui ke Versi 2.0.0 secara otomatis tanpa downtime.
+   
+   ![Halaman Web v2.0.0 Automated](../assets/modul-08/09_browser_v2_automated.png)
+   *Gambar 10. Tampilan website hasil otomatisasi deployment versi 2.0.0.*
 
 ---
 

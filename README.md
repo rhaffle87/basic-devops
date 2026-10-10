@@ -30,6 +30,13 @@ flowchart LR
 basic-devops/
 ├── .gitignore
 ├── README.md
+├── generate_assets.py
+├── assets/
+│   ├── modul-07/                                         # Tangkapan layar langkah Modul 7
+│   ├── modul-08/                                         # Tangkapan layar terminal & browser Modul 8
+│   ├── modul-09/                                         # Tangkapan layar Docker container Modul 9
+│   ├── modul-10/                                         # Tangkapan layar GitHub Actions & GHCR Modul 10
+│   └── modul-11/                                         # Tangkapan layar SSL, Proxy & Logs Modul 11
 ├── modul/
 │   ├── MODUL_07_DASAR_LINUX_DAN_WEBSERVER.md
 │   ├── MODUL_08_OTOMASI_GIT_DAN_SHELL_SCRIPTING.md

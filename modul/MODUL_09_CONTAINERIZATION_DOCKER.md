@@ -139,71 +139,27 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah Docker dan adm
    ```bash
    docker run --rm hello-world
    ```
-   *Jika tampil pesan `Hello from Docker!`, instalasi berhasil.*
+   ![Verifikasi Docker Hello World](../assets/modul-09/01_docker_hello_world.png)
+   *Gambar 2. Output verifikasi instalasi Docker Engine berhasil.*
 
 ---
 
 #### 4.2 Menyiapkan Workspace Proyek dan Halaman Web
 1. Buat direktori kerja baru untuk Modul 9:
    ```bash
-   mkdir -p ~/docker-web && cd ~/docker-web
+   mkdir -p ~/docker-web/src && cd ~/docker-web
    ```
-2. Buat folder `src` untuk menyimpan kode website:
-   ```bash
-   mkdir src
-   ```
-3. Buat file `src/index.html`:
-   ```bash
-   cat << 'EOF' > src/index.html
-   <!DOCTYPE html>
-   <html lang="id">
-   <head>
-       <meta charset="UTF-8">
-       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       <title>Docker Containerization Lab</title>
-       <style>
-           body { font-family: "Segoe UI", Arial, sans-serif; background-color: #0b132b; color: #ffffff; text-align: center; padding-top: 70px; }
-           .card { background: #1c2541; padding: 35px; border-radius: 12px; display: inline-block; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 1px solid #3a506b; }
-           h1 { color: #5bc0be; margin-bottom: 5px; }
-           .tag { background: #6fffe9; color: #0b132b; padding: 5px 12px; border-radius: 4px; font-weight: bold; }
-           .info { margin-top: 20px; font-size: 0.9rem; color: #cbd5e1; }
-       </style>
-   </head>
-   <body>
-       <div class="card">
-           <h1>Aplikasi Web Terkontainerisasi</h1>
-           <p>Modul 9: Docker Engine & Nginx Alpine</p>
-           <p><span class="tag">Dockerized Container v1.0</span></p>
-           <p class="info">Berjalan secara terisolasi tanpa merusak host system.</p>
-       </div>
-   </body>
-   </html>
-   EOF
-   ```
+2. Buat file `src/index.html` sebagai halaman web uji.
 
 ---
 
 #### 4.3 Menulis `Dockerfile` Khusus Nginx
 1. Buat file `Dockerfile` pada root direktori proyek (`~/docker-web/Dockerfile`):
-   ```dockerfile
-   # Menggunakan image Nginx versi Alpine Linux yang sangat ringan (~23MB)
-   FROM nginx:alpine
-
-   # Label metadata pembuat image
-   LABEL maintainer="Tim Pelatihan Internal DevOps"
-
-   # Hapus file html bawaan nginx
-   RUN rm -rf /usr/share/nginx/html/*
-
-   # Salin file web dari host ke document root Nginx di dalam container
-   COPY ./src /usr/share/nginx/html
-
-   # Dokumentasikan bahwa aplikasi berjalan di port 80
-   EXPOSE 80
-
-   # Perintah eksekusi utama saat container berjalan di foreground
-   CMD ["nginx", "-g", "daemon off;"]
+   ```bash
+   cat Dockerfile
    ```
+   ![Melihat Isi Dockerfile](../assets/modul-09/02_dockerfile_view.png)
+   *Gambar 3. Teks deklarasi Dockerfile berbasis Nginx Alpine.*
 
 ---
 
@@ -212,39 +168,39 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah Docker dan adm
    ```bash
    docker build -t my-devops-web:v1 .
    ```
+   ![Proses Build Docker Image](../assets/modul-09/03_docker_build.png)
+   *Gambar 4. Output tahapan pembangunan layer Docker Image.*
+
 2. Periksa daftar image yang tersedia di host lokal:
    ```bash
    docker images
    ```
-   *Perhatikan bahwa image `my-devops-web:v1` memiliki ukuran sangat efisien (kurang dari 30 MB).*
-3. Jalankan kontainer di latar belakang (*detached mode*) dengan melakukan *port forwarding* dari port 8080 host ke port 80 kontainer:
+   ![Daftar Docker Images](../assets/modul-09/04_docker_images.png)
+   *Gambar 5. Daftar template image lokal berukuran ringan (<25 MB).*
+
+3. Jalankan kontainer di latar belakang (*detached mode*) dengan melakukan *port forwarding* dari port 8080 host ke port 80 kontainer, lalu periksa statusnya:
    ```bash
    docker run -d --name web-container-v1 -p 8080:80 my-devops-web:v1
-   ```
-4. Verifikasi status kontainer yang sedang berjalan:
-   ```bash
    docker ps
    ```
-5. Buka browser Windows dan akses:
-   ```text
-   http://localhost:8080
-   ```
-   *Halaman bertuliskan "Aplikasi Web Terkontainerisasi" akan tampil.*
+   ![Menjalankan Kontainer dan Memeriksa Status](../assets/modul-09/05_docker_run_ps.png)
+   *Gambar 6. Kontainer berjalan aktif pada port binding 0.0.0.0:8080->80/tcp.*
+
+4. Buka browser Windows dan akses `http://localhost:8080`:
+   
+   ![Tampilan Web Terkontainerisasi di Browser](../assets/modul-09/06_browser_docker_8080.png)
+   *Gambar 7. Halaman website yang dilayani dari dalam Docker container.*
 
 ---
 
 #### 4.5 Menggunakan Bind-Mount Volume untuk Live Reload
-Saat proses pengembangan (*development phase*), membangun ulang image (*rebuild*) setiap ada perubahan kecil sangat tidak efisien. Solusinya adalah menghubungkan folder lokal langsung ke dalam kontainer melalui *Bind Mount*.
+Saat proses pengembangan (*development phase*), menghubungkan folder lokal langsung ke dalam kontainer melalui *Bind Mount* memungkinkan pembaruan kode instan tanpa *rebuild*.
 
 1. Jalankan kontainer baru dengan parameter volume bind mount:
    ```bash
    docker run -d --name web-live -p 8081:80 -v $(pwd)/src:/usr/share/nginx/html:ro nginx:alpine
    ```
-2. Sekarang ubah teks pada `src/index.html` langsung dari terminal host:
-   ```bash
-   sed -i 's/v1.0/v1.0 (Live Reload Active)/g' src/index.html
-   ```
-3. Akses `http://localhost:8081` pada browser dan refresh (`F5`). Perubahan langsung terlihat seketika tanpa perlu me-restart kontainer.
+2. Modifikasi teks pada `src/index.html` dan refresh browser pada `http://localhost:8081`. Perubahan langsung tampil seketika.
 
 ---
 
@@ -254,39 +210,23 @@ Saat proses pengembangan (*development phase*), membangun ulang image (*rebuild*
    docker stop web-container-v1 web-live || true
    docker rm web-container-v1 web-live || true
    ```
-2. Buat file `docker-compose.yml` pada direktori `~/docker-web`:
-   ```yaml
-   version: '3.8'
-
-   services:
-     web:
-       build:
-         context: .
-         dockerfile: Dockerfile
-       container_name: devops-production-web
-       restart: always
-       ports:
-         - "8080:80"
-       volumes:
-         - ./src:/usr/share/nginx/html:ro
-       environment:
-         - ENVIRONMENT=production
-       networks:
-         - devops-net
-
-   networks:
-     devops-net:
-       driver: bridge
-   ```
+2. Buat file `docker-compose.yml` pada direktori `~/docker-web`.
 3. Jalankan seluruh stack layanan secara otomatis:
    ```bash
    docker compose up -d
+   docker compose ps
    ```
-4. Pantau log layanan secara terpusat:
+   ![Eksekusi Docker Compose Up](../assets/modul-09/07_docker_compose_up.png)
+   *Gambar 8. Orkestrasi otomatis stack layanan Nginx dengan Docker Compose.*
+
+4. Pantau konsumsi sumber daya dan log layanan secara terpusat:
    ```bash
-   docker compose logs -f web
+   docker stats --no-stream
+   docker compose logs --tail=4
    ```
-   *Tekan `Ctrl + C` untuk keluar dari streaming log.*
+   ![Monitoring Resource dan Streaming Log](../assets/modul-09/08_docker_stats_logs.png)
+   *Gambar 9. Statistik penggunaan RAM/CPU dan streaming log akses HTTP.*
+
 5. Untuk mematikan dan membersihkan stack layanan:
    ```bash
    docker compose down

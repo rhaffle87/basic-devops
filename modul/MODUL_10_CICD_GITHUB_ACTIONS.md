@@ -127,114 +127,45 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah GitHub CLI, Gi
 ---
 
 #### 4.2 Menulis Skrip Pipeline Alur Kerja (`.github/workflows/ci-cd.yml`)
-1. Buat struktur folder wajib untuk GitHub Actions:
+1. Buat struktur folder wajib untuk GitHub Actions dan file alur kerja pipeline:
    ```bash
    mkdir -p .github/workflows
-   ```
-2. Buat file konfigurasi pipeline:
-   ```bash
    nano .github/workflows/ci-cd.yml
    ```
-3. Tuliskan konfigurasi deklaratif pipeline berikut:
-   ```yaml
-   name: Automated CI/CD Pipeline
-
-   on:
-     push:
-       branches: [ "main" ]
-     pull_request:
-       branches: [ "main" ]
-
-   permissions:
-     contents: read
-     packages: write
-
-   jobs:
-     # -------------------------------------------------------------
-     # TAHAP 1: CONTINUOUS INTEGRATION (CI)
-     # -------------------------------------------------------------
-     code-quality:
-       name: Linting & Integrity Check
-       runs-on: ubuntu-latest
-       steps:
-         - name: Unduh Source Code (Checkout)
-           uses: actions/checkout@v4
-
-         - name: Validasi Integritas File
-           run: |
-             echo "=== Memeriksa keberadaan file utama ==="
-             test -f index.html || { echo "File index.html tidak ditemukan!"; exit 1; }
-             test -f Dockerfile || { echo "Dockerfile tidak ditemukan!"; exit 1; }
-             echo "File integritas: OK"
-
-         - name: Validasi HTML Sintaks Sederhana
-           run: |
-             echo "=== Menjalankan verifikasi dasar HTML ==="
-             grep -q "</html>" index.html || { echo "Tag penutup HTML tidak valid!"; exit 1; }
-             echo "Sintaks HTML: Valid"
-
-     # -------------------------------------------------------------
-     # TAHAP 2: CONTINUOUS DELIVERY (BUILD & PUSH DOCKER IMAGE)
-     # -------------------------------------------------------------
-     build-and-push:
-       name: Build & Push Docker Image ke GHCR
-       needs: code-quality
-       runs-on: ubuntu-latest
-       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-       steps:
-         - name: Unduh Source Code
-           uses: actions/checkout@v4
-
-         - name: Setup Docker Buildx
-           uses: docker/setup-buildx-action@v3
-
-         - name: Login ke GitHub Container Registry (GHCR)
-           uses: docker/login-action@v3
-           with:
-             registry: ghcr.io
-             username: ${{ github.actor }}
-             password: ${{ secrets.GITHUB_TOKEN }}
-
-         - name: Ekstrak Metadata Tagging Image
-           id: meta
-           uses: docker/metadata-action@v5
-           with:
-             images: ghcr.io/${{ github.repository }}
-             tags: |
-               type=sha,format=short
-               type=raw,value=latest
-
-         - name: Pembangunan dan Pengunggahan Image
-           uses: docker/build-push-action@v5
-           with:
-             context: .
-             push: true
-             tags: ${{ steps.meta.outputs.tags }}
-             labels: ${{ steps.meta.outputs.labels }}
+2. Verifikasi keberadaan dan struktur berkas pipeline:
+   ```bash
+   ls -la .github/workflows/
+   head -n 12 .github/workflows/ci-cd.yml
    ```
-4. Simpan file (`Ctrl + O`, `Enter`, `Ctrl + X`).
+   ![Struktur Workspace CI/CD](../assets/modul-10/01_project_structure.png)
+   *Gambar 2. Struktur berkas deklaratif workflow GitHub Actions.*
 
 ---
 
 #### 4.3 Menghubungkan ke GitHub dan Memicu Eksekusi Pipeline
-1. Buat repositori baru pada akun GitHub menggunakan GitHub CLI:
-   ```bash
-   gh repo create my-devops-cicd --public --source=. --remote=origin --push
-   ```
-   *Jika repositori sudah ada, cukup hubungkan remote dan lakukan push:*
+1. Hubungkan repositori ke GitHub dan lakukan pengunggahan kode:
    ```bash
    git add .
    git commit -m "ci: tambahkan workflow pipeline github actions"
    git push origin main
    ```
+   ![Git Push ke GitHub](../assets/modul-10/02_git_push_main.png)
+   *Gambar 3. Memicu trigger push workflow ke branch main.*
+
 2. Buka antarmuka GitHub di browser, lalu masuk ke tab **Actions** pada repositori Anda.
 3. Amati jalannya dua job bertahap:
-   - **Linting & Integrity Check** (Job CI yang memastikan kualitas kode).
-   - **Build & Push Docker Image ke GHCR** (Job CD yang membangun dan menerbitkan container image).
-4. Setelah semua job bertanda centang hijau, buka halaman utama repositori dan lihat bagian kanan pada menu **Packages**. Docker image hasil build otomatis telah tersedia untuk diunduh publik:
-   ```text
+   - **code-quality (Lint & Integrity):** Menjalankan pemeriksaan file dan HTML sintaks.
+   - **build-and-push (GHCR Publish):** Membangun Docker Image dan menerbitkan ke GitHub Packages.
+   
+   ![Status Workflow GitHub Actions](../assets/modul-10/03_github_actions_workflow.png)
+   *Gambar 4. Tampilan antarmuka GitHub Actions berstatus centang hijau (All checks passed).*
+
+4. Setelah semua job bertanda centang hijau, buka terminal dan uji pengunduhan image yang berhasil diterbitkan:
+   ```bash
    docker pull ghcr.io/<username>/my-devops-cicd:latest
    ```
+   ![Verifikasi Unduh Image dari GHCR](../assets/modul-10/05_ghcr_packages.png)
+   *Gambar 5. Mengunduh container image hasil build otomatis dari GHCR.*
 
 ---
 
@@ -279,5 +210,9 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah GitHub CLI, Gi
 ### 6. Tugas dan Evaluasi Praktikum
 1. **Simulasi Kegagalan Pipeline (Break the Build):**  
    Hapus tag penutup `</html>` pada file `index.html`, lalu lakukan `git commit` dan `git push` ke repositori. Amati apa yang terjadi pada tab GitHub Actions. Tunjukkan bahwa job `code-quality` berhasil mendeteksi error dan job `build-and-push` secara otomatis dibatalkan (*cancelled/blocked*).
+   
+   ![Simulasi Kegagalan Pipeline GitHub Actions](../assets/modul-10/06_broken_build_ci_alert.png)
+   *Gambar 6. Simulasi mekanisme fail-fast: kegagalan tahap CI membatalkan otomatis tahap build & push.*
+
 2. **Menambahkan Multi-Environment Tagging:**  
    Modifikasi file `ci-cd.yml` agar selain menghasilkan tag `latest`, image yang dibangun juga diberi label nomor commit Git yang spesifik (`sha`).

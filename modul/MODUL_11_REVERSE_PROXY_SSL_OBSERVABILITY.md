@@ -113,19 +113,19 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah OpenSSL, cURL 
 
 #### 4.2 Pembuatan Sertifikat SSL/TLS Mandiri (Self-Signed SSL)
 Untuk mempraktikkan enkripsi HTTPS secara lokal, buat sertifikat SSL menggunakan `openssl`:
-1. Masuk ke direktori `certs`:
+1. Masuk ke direktori `certs` dan buat sertifikat x509:
    ```bash
    cd ~/nginx-proxy-lab/certs
-   ```
-2. Buat private key dan sertifikat x509 yang berlaku selama 365 hari:
-   ```bash
    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
      -keyout server.key \
      -out server.crt \
      -subj "/C=ID/ST=JawaTimur/L=Surabaya/O=PelatihanInternal/CN=localhost"
+   ls -la
    ```
-3. Pastikan dua berkas telah terbentuk: `server.key` (kunci privat) dan `server.crt` (sertifikat publik).
-4. Kembali ke root direktori proyek:
+   ![Pembuatan Sertifikat SSL OpenSSL](../assets/modul-11/01_openssl_cert_gen.png)
+   *Gambar 2. Pembuatan pasangan private key dan public certificate x509.*
+
+2. Kembali ke root direktori proyek:
    ```bash
    cd ~/nginx-proxy-lab
    ```
@@ -135,119 +135,22 @@ Untuk mempraktikkan enkripsi HTTPS secara lokal, buat sertifikat SSL menggunakan
 #### 4.3 Mengonfigurasi Nginx Reverse Proxy & Load Balancer
 1. Buat file konfigurasi proxy pada direktori `proxy/nginx.conf`:
    ```bash
-   nano proxy/nginx.conf
+   cat proxy/nginx.conf
    ```
-2. Tuliskan blok konfigurasi Nginx terpusat berikut:
-   ```nginx
-   events { worker_connections 1024; }
-
-   http {
-       # Format log kustom untuk kebutuhan observability
-       log_format custom_devops '$remote_addr - $remote_user [$time_local] '
-                                '"$request" $status $body_bytes_sent '
-                                '"$http_referer" "$http_user_agent" '
-                                'Upstream: $upstream_addr Status: $upstream_status '
-                                'ResponseTime: ${upstream_response_time}s';
-
-       access_log /var/log/nginx/access.log custom_devops;
-       error_log  /var/log/nginx/error.log warn;
-
-       # 1. Definisi Pool Backend Server (Load Balancing Upstream)
-       upstream my_cluster {
-           server app1:80;
-           server app2:80;
-       }
-
-       # 2. Server Block: HTTP Port 80 (Redirect Otomatis ke HTTPS)
-       server {
-           listen 80;
-           server_name localhost;
-           return 301 https://$host$request_uri;
-       }
-
-       # 3. Server Block: HTTPS Port 443 (SSL Termination & Proxy Gateway)
-       server {
-           listen 443 ssl;
-           server_name localhost;
-
-           ssl_certificate     /etc/nginx/certs/server.crt;
-           ssl_certificate_key /etc/nginx/certs/server.key;
-
-           ssl_protocols       TLSv1.2 TLSv1.3;
-           ssl_ciphers         HIGH:!aNULL:!MD5;
-
-           location / {
-               proxy_pass http://my_cluster;
-
-               # Meneruskan Header Identitas Klien Asli
-               proxy_set_header Host $host;
-               proxy_set_header X-Real-IP $remote_addr;
-               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-               proxy_set_header X-Forwarded-Proto $scheme;
-
-               # Batas Timeout Komunikasi ke Backend
-               proxy_connect_timeout 5s;
-               proxy_read_timeout 60s;
-           }
-       }
-   }
-   ```
-3. Simpan dan keluar dari editor (`Ctrl + O`, `Enter`, `Ctrl + X`).
+   ![Konfigurasi Nginx Reverse Proxy dan SSL](../assets/modul-11/02_nginx_proxy_conf.png)
+   *Gambar 3. Deklarasi blok upstream pool, redirect HTTP port 80, dan SSL port 443.*
 
 ---
 
 #### 4.4 Mengorkestrasi Multi-Container Menggunakan Docker Compose
-1. Buat file `docker-compose.yml` pada root direktori `~/nginx-proxy-lab`:
-   ```yaml
-   version: '3.8'
-
-   services:
-     # Backend 1 (Instance ALPHA)
-     app1:
-       image: nginx:alpine
-       container_name: backend-alpha
-       volumes:
-         - ./app1:/usr/share/nginx/html:ro
-       networks:
-         - internal-net
-
-     # Backend 2 (Instance BETA)
-     app2:
-       image: nginx:alpine
-       container_name: backend-beta
-       volumes:
-         - ./app2:/usr/share/nginx/html:ro
-       networks:
-         - internal-net
-
-     # Reverse Proxy Gateway & SSL Terminator
-     reverse-proxy:
-       image: nginx:alpine
-       container_name: nginx-gateway
-       ports:
-         - "80:80"
-         - "443:443"
-       volumes:
-         - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
-         - ./certs:/etc/nginx/certs:ro
-       depends_on:
-         - app1
-         - app2
-       networks:
-         - internal-net
-
-   networks:
-     internal-net:
-       driver: bridge
-   ```
-2. Jalankan seluruh arsitektur layanan:
+1. Buat file `docker-compose.yml` pada root direktori `~/nginx-proxy-lab`.
+2. Jalankan seluruh arsitektur cluster layanan dan periksa statusnya:
    ```bash
    docker compose up -d
-   ```
-3. Verifikasi bahwa ketiga kontainer berjalan normal:
-   ```bash
    docker compose ps
    ```
+   ![Cluster Multi-Container Berjalan](../assets/modul-11/03_docker_compose_cluster.png)
+   *Gambar 4. Tiga kontainer (2 backend instances + 1 gateway proxy) berjalan aktif.*
 
 ---
 
@@ -256,24 +159,27 @@ Untuk mempraktikkan enkripsi HTTPS secara lokal, buat sertifikat SSL menggunakan
    ```bash
    curl -I http://localhost
    ```
-   *Amati bahwa server mengembalikan status `HTTP/1.1 301 Moved Permanently` dengan header `Location: https://localhost/`.*
+   ![Uji HTTP 301 Redirect](../assets/modul-11/04_curl_http_redirect.png)
+   *Gambar 5. Output respons HTTP 301 Moved Permanently mengarahkan traffic ke HTTPS.*
 
-2. Uji endpoint HTTPS (gunakan flag `-k` untuk mengabaikan peringatan sertifikat self-signed pada curl):
+2. Uji mekanisme pembagian beban (*load balancing*) round-robin:
    ```bash
    for i in {1..4}; do curl -sk https://localhost | grep "Backend Server Instance"; done
    ```
-   *Output terminal akan menampilkan balasan secara bergantian antara instance ALPHA dan BETA:*
-   ```text
-   <h1>Backend Server Instance: ALPHA [01]</h1>
-   <h1>Backend Server Instance: BETA [02]</h1>
-   <h1>Backend Server Instance: ALPHA [01]</h1>
-   <h1>Backend Server Instance: BETA [02]</h1>
-   ```
+   ![Pengujian Round-Robin Load Balancing](../assets/modul-11/05_curl_load_balancer_round_robin.png)
+   *Gambar 6. Respons bergantian 50:50 antara backend ALPHA dan BETA.*
 
-3. Pantau Observability Log Nginx secara langsung:
+3. Buka peramban web di Windows dan akses `https://localhost` (terima sertifikat self-signed pada browser):
+   
+   ![Tampilan Web Melalui HTTPS Reverse Proxy](../assets/modul-11/06_browser_https_instance.png)
+   *Gambar 7. Halaman website yang dilayani secara aman melalui koneksi HTTPS TLSv1.3.*
+
+4. Pantau Observability Log Nginx secara langsung:
    ```bash
    docker compose logs -f reverse-proxy
    ```
+   ![Streaming Log Observability Nginx](../assets/modul-11/07_observability_access_logs.png)
+   *Gambar 8. Format log kustom mencatat alamat IP upstream, status respon, dan latency.*
    *Perhatikan baris log yang mencatat alamat `Upstream: 172.x.x.x:80` dan `ResponseTime: 0.000s` untuk setiap request.*
 
 ---
