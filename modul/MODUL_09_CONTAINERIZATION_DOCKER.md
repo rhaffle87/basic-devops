@@ -149,12 +149,55 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah Docker dan adm
    ```bash
    mkdir -p ~/docker-web/src && cd ~/docker-web
    ```
-2. Buat file `src/index.html` sebagai halaman web uji.
+2. Buat file `src/index.html` sebagai halaman web uji:
+   ```bash
+   cat << 'EOF' > src/index.html
+   <!DOCTYPE html>
+   <html lang="id">
+   <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Docker Containerization Lab - Modul 9</title>
+       <style>
+           body { font-family: "Segoe UI", Arial, sans-serif; background-color: #0b132b; color: #ffffff; text-align: center; padding-top: 70px; }
+           .card { background: #1c2541; padding: 35px; border-radius: 12px; display: inline-block; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 1px solid #3a506b; }
+           h1 { color: #5bc0be; margin-bottom: 5px; }
+           .tag { background: #6fffe9; color: #0b132b; padding: 5px 12px; border-radius: 4px; font-weight: bold; }
+           .info { margin-top: 20px; font-size: 0.9rem; color: #cbd5e1; }
+       </style>
+   </head>
+   <body>
+       <div class="card">
+           <h1>Aplikasi Web Terkontainerisasi</h1>
+           <p>Modul 9: Docker Engine & Nginx Alpine</p>
+           <p><span class="tag">Dockerized Container v1.0</span></p>
+           <p class="info">Berjalan secara terisolasi tanpa merusak host system.</p>
+       </div>
+   </body>
+   </html>
+   EOF
+   ```
 
 ---
 
 #### 4.3 Menulis `Dockerfile` Khusus Nginx
 1. Buat file `Dockerfile` pada root direktori proyek (`~/docker-web/Dockerfile`):
+   ```bash
+   cat << 'EOF' > Dockerfile
+   FROM nginx:alpine
+
+   LABEL maintainer="Tim Pelatihan Internal DevOps"
+
+   RUN rm -rf /usr/share/nginx/html/*
+
+   COPY ./src /usr/share/nginx/html
+
+   EXPOSE 80
+
+   CMD ["nginx", "-g", "daemon off;"]
+   EOF
+   ```
+2. Verifikasi isi file `Dockerfile`:
    ```bash
    cat Dockerfile
    ```
@@ -210,7 +253,30 @@ Saat proses pengembangan (*development phase*), menghubungkan folder lokal langs
    docker stop web-container-v1 web-live || true
    docker rm web-container-v1 web-live || true
    ```
-2. Buat file `docker-compose.yml` pada direktori `~/docker-web`.
+2. Buat file `docker-compose.yml` pada direktori `~/docker-web`:
+   ```yaml
+   version: '3.8'
+
+   services:
+     web:
+       build:
+         context: .
+         dockerfile: Dockerfile
+       container_name: devops-production-web
+       restart: always
+       ports:
+         - "8080:80"
+       volumes:
+         - ./src:/usr/share/nginx/html:ro
+       environment:
+         - ENVIRONMENT=production
+       networks:
+         - devops-net
+
+   networks:
+     devops-net:
+       driver: bridge
+   ```
 3. Jalankan seluruh stack layanan secara otomatis:
    ```bash
    docker compose up -d

@@ -528,7 +528,7 @@ def render_github_actions_mock(output_path, status='success'):
     print(f'Generated: {output_path}')
 
 render_github_actions_mock('assets/modul-10/03_github_actions_workflow.png', status='success')
-render_github_actions_mock('assets/modul-10/06_broken_build_ci_alert.png', status='failed')
+render_github_packages_mock('assets/modul-10/04_github_packages_ui.png')
 
 render_terminal(
     'assets/modul-10/05_ghcr_packages.png',
@@ -546,6 +546,8 @@ render_terminal(
         ('user@devops-lab:~$ ', '#4af626', '', '#ffffff')
     ]
 )
+
+render_github_actions_mock('assets/modul-10/06_broken_build_ci_alert.png', status='failed')
 
 # ==========================================
 # GENERATE MODUL 11 ASSETS
@@ -646,21 +648,36 @@ render_terminal(
     ]
 )
 
+render_browser_ssl_warning('assets/modul-11/06_browser_ssl_warning.png')
+
 render_browser(
-    'assets/modul-11/06_browser_https_instance.png',
+    'assets/modul-11/07_browser_https_instance_alpha.png',
     'https://localhost (SSL Encrypted)',
     'Reverse Proxy Gateway',
     'Backend Server Instance: ALPHA [01]',
     'Melayani request melalui Nginx Load Balancer Round-Robin',
     'HTTPS / TLSv1.3 Active',
     '#10b981',
-    'Upstream: app1:80 | Node Status: HEALTHY',
+    'Upstream Node: app1 (172.19.0.2:80) | Status: 200 OK',
     bg_col='#0f172a',
     card_bg='#1e3a8a'
 )
 
+render_browser(
+    'assets/modul-11/08_browser_https_instance_beta.png',
+    'https://localhost (SSL Encrypted)',
+    'Reverse Proxy Gateway',
+    'Backend Server Instance: BETA [02]',
+    'Melayani request melalui Nginx Load Balancer Round-Robin',
+    'HTTPS / TLSv1.3 Active',
+    '#10b981',
+    'Upstream Node: app2 (172.19.0.3:80) | Status: 200 OK',
+    bg_col='#0f172a',
+    card_bg='#065f46'
+)
+
 render_terminal(
-    'assets/modul-11/07_observability_access_logs.png',
+    'assets/modul-11/09_observability_access_logs.png',
     'Ubuntu WSL2 — Nginx Observability Real-time Stream',
     [
         ('user@devops-lab:~/nginx-proxy-lab$ ', '#4af626', 'docker compose logs -f reverse-proxy', '#ffffff'),
@@ -674,3 +691,4 @@ render_terminal(
 )
 
 print('All assets successfully generated!')
+

@@ -135,6 +135,59 @@ Untuk mempraktikkan enkripsi HTTPS secara lokal, buat sertifikat SSL menggunakan
 #### 4.3 Mengonfigurasi Nginx Reverse Proxy & Load Balancer
 1. Buat file konfigurasi proxy pada direktori `proxy/nginx.conf`:
    ```bash
+   nano proxy/nginx.conf
+   ```
+2. Isikan konfigurasi reverse proxy, load balancer upstream, dan SSL berikut:
+   ```nginx
+   events { worker_connections 1024; }
+
+   http {
+       log_format custom_devops '$remote_addr - $remote_user [$time_local] '
+                               '"$request" $status $body_bytes_sent '
+                               '"$http_referer" "$http_user_agent" '
+                               'Upstream: $upstream_addr Status: $upstream_status '
+                               'ResponseTime: ${upstream_response_time}s';
+
+       access_log /var/log/nginx/access.log custom_devops;
+       error_log  /var/log/nginx/error.log warn;
+
+       upstream my_cluster {
+           server app1:80;
+           server app2:80;
+       }
+
+       server {
+           listen 80;
+           server_name localhost;
+           return 301 https://$host$request_uri;
+       }
+
+       server {
+           listen 443 ssl;
+           server_name localhost;
+
+           ssl_certificate     /etc/nginx/certs/server.crt;
+           ssl_certificate_key /etc/nginx/certs/server.key;
+
+           ssl_protocols       TLSv1.2 TLSv1.3;
+           ssl_ciphers         HIGH:!aNULL:!MD5;
+
+           location / {
+               proxy_pass http://my_cluster;
+
+               proxy_set_header Host $host;
+               proxy_set_header X-Real-IP $remote_addr;
+               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+               proxy_set_header X-Forwarded-Proto $scheme;
+
+               proxy_connect_timeout 5s;
+               proxy_read_timeout 60s;
+           }
+       }
+   }
+   ```
+3. Simpan perubahan (`Ctrl + O`, `Enter`, `Ctrl + X`), lalu periksa kembali isi file:
+   ```bash
    cat proxy/nginx.conf
    ```
    ![Konfigurasi Nginx Reverse Proxy dan SSL](../assets/modul-11/02_nginx_proxy_conf.png)
@@ -143,8 +196,51 @@ Untuk mempraktikkan enkripsi HTTPS secara lokal, buat sertifikat SSL menggunakan
 ---
 
 #### 4.4 Mengorkestrasi Multi-Container Menggunakan Docker Compose
-1. Buat file `docker-compose.yml` pada root direktori `~/nginx-proxy-lab`.
-2. Jalankan seluruh arsitektur cluster layanan dan periksa statusnya:
+1. Buat file `docker-compose.yml` pada root direktori `~/nginx-proxy-lab`:
+   ```bash
+   nano docker-compose.yml
+   ```
+2. Tuliskan arsitektur multi-container berikut:
+   ```yaml
+   version: '3.8'
+
+   services:
+     app1:
+       image: nginx:alpine
+       container_name: backend-alpha
+       volumes:
+         - ./app1:/usr/share/nginx/html:ro
+       networks:
+         - internal-net
+
+     app2:
+       image: nginx:alpine
+       container_name: backend-beta
+       volumes:
+         - ./app2:/usr/share/nginx/html:ro
+       networks:
+         - internal-net
+
+     reverse-proxy:
+       image: nginx:alpine
+       container_name: nginx-gateway
+       ports:
+         - "80:80"
+         - "443:443"
+       volumes:
+         - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+         - ./certs:/etc/nginx/certs:ro
+       depends_on:
+         - app1
+         - app2
+       networks:
+         - internal-net
+
+   networks:
+     internal-net:
+       driver: bridge
+   ```
+3. Simpan perubahan, lalu jalankan seluruh arsitektur cluster layanan dan periksa statusnya:
    ```bash
    docker compose up -d
    docker compose ps
@@ -162,24 +258,35 @@ Untuk mempraktikkan enkripsi HTTPS secara lokal, buat sertifikat SSL menggunakan
    ![Uji HTTP 301 Redirect](../assets/modul-11/04_curl_http_redirect.png)
    *Gambar 5. Output respons HTTP 301 Moved Permanently mengarahkan traffic ke HTTPS.*
 
-2. Uji mekanisme pembagian beban (*load balancing*) round-robin:
+2. Uji mekanisme pembagian beban (*load balancing*) round-robin melalui baris perintah:
    ```bash
    for i in {1..4}; do curl -sk https://localhost | grep "Backend Server Instance"; done
    ```
    ![Pengujian Round-Robin Load Balancing](../assets/modul-11/05_curl_load_balancer_round_robin.png)
    *Gambar 6. Respons bergantian 50:50 antara backend ALPHA dan BETA.*
 
-3. Buka peramban web di Windows dan akses `https://localhost` (terima sertifikat self-signed pada browser):
+3. Buka peramban web di Windows dan akses `https://localhost`.
+   Pada pembukaan pertama, peramban akan menampilkan peringatan keamanan karena sertifikat dibuat mandiri (*self-signed*):
    
-   ![Tampilan Web Melalui HTTPS Reverse Proxy](../assets/modul-11/06_browser_https_instance.png)
-   *Gambar 7. Halaman website yang dilayani secara aman melalui koneksi HTTPS TLSv1.3.*
+   ![Peringatan Keamanan Browser Self-Signed SSL](../assets/modul-11/06_browser_ssl_warning.png)
+   *Gambar 7. Peringatan keamanan sertifikat self-signed pada browser (NET::ERR_CERT_AUTHORITY_INVALID).*
 
-4. Pantau Observability Log Nginx secara langsung:
+   Klik **Advanced** -> **Proceed to localhost (unsafe)** untuk melanjutkan ke website. Peramban akan merender halaman backend:
+
+   ![Tampilan Backend Alpha Melalui HTTPS](../assets/modul-11/07_browser_https_instance_alpha.png)
+   *Gambar 8. Halaman Backend ALPHA [01] dilayani secara aman melalui koneksi HTTPS TLSv1.3.*
+
+   Lakukan penyegaran halaman web (*refresh* / `F5`) pada peramban. Beban request akan dialihkan secara otomatis ke server kedua:
+
+   ![Tampilan Backend Beta Melalui HTTPS](../assets/modul-11/08_browser_https_instance_beta.png)
+   *Gambar 9. Halaman Backend BETA [02] merespons bergantian membuktikan algoritma round-robin aktif.*
+
+4. Pantau Observability Log Nginx secara langsung dari terminal:
    ```bash
    docker compose logs -f reverse-proxy
    ```
-   ![Streaming Log Observability Nginx](../assets/modul-11/07_observability_access_logs.png)
-   *Gambar 8. Format log kustom mencatat alamat IP upstream, status respon, dan latency.*
+   ![Streaming Log Observability Nginx](../assets/modul-11/09_observability_access_logs.png)
+   *Gambar 10. Format log kustom mencatat alamat IP upstream, status respon, dan latency.*
    *Perhatikan baris log yang mencatat alamat `Upstream: 172.x.x.x:80` dan `ResponseTime: 0.000s` untuk setiap request.*
 
 ---

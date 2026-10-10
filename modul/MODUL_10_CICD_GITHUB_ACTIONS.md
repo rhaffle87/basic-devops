@@ -127,12 +127,83 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah GitHub CLI, Gi
 ---
 
 #### 4.2 Menulis Skrip Pipeline Alur Kerja (`.github/workflows/ci-cd.yml`)
-1. Buat struktur folder wajib untuk GitHub Actions dan file alur kerja pipeline:
+1. Buat struktur folder wajib untuk GitHub Actions dan buat file alur kerja pipeline:
    ```bash
    mkdir -p .github/workflows
    nano .github/workflows/ci-cd.yml
    ```
-2. Verifikasi keberadaan dan struktur berkas pipeline:
+2. Isikan konfigurasi deklaratif pipeline berikut ke dalam `.github/workflows/ci-cd.yml`:
+   ```yaml
+   name: Automated CI/CD Pipeline
+
+   on:
+     push:
+       branches: [ "main" ]
+     pull_request:
+       branches: [ "main" ]
+
+   permissions:
+     contents: read
+     packages: write
+
+   jobs:
+     code-quality:
+       name: Linting & Integrity Check
+       runs-on: ubuntu-latest
+       steps:
+         - name: Unduh Source Code (Checkout)
+           uses: actions/checkout@v4
+
+         - name: Validasi Integritas File
+           run: |
+             echo "=== Memeriksa keberadaan file utama ==="
+             test -f index.html || { echo "File index.html tidak ditemukan!"; exit 1; }
+             test -f Dockerfile || { echo "Dockerfile tidak ditemukan!"; exit 1; }
+             echo "File integritas: OK"
+
+         - name: Validasi HTML Sintaks Sederhana
+           run: |
+             echo "=== Menjalankan verifikasi dasar HTML ==="
+             grep -q "</html>" index.html || { echo "Tag penutup HTML tidak valid!"; exit 1; }
+             echo "Sintaks HTML: Valid"
+
+     build-and-push:
+       name: Build & Push Docker Image ke GHCR
+       needs: code-quality
+       runs-on: ubuntu-latest
+       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+       steps:
+         - name: Unduh Source Code
+           uses: actions/checkout@v4
+
+         - name: Setup Docker Buildx
+           uses: docker/setup-buildx-action@v3
+
+         - name: Login ke GitHub Container Registry (GHCR)
+           uses: docker/login-action@v3
+           with:
+             registry: ghcr.io
+             username: ${{ github.actor }}
+             password: ${{ secrets.GITHUB_TOKEN }}
+
+         - name: Ekstrak Metadata Tagging Image
+           id: meta
+           uses: docker/metadata-action@v5
+           with:
+             images: ghcr.io/${{ github.repository }}
+             tags: |
+               type=sha,format=short
+               type=raw,value=latest
+
+         - name: Pembangunan dan Pengunggahan Image
+           uses: docker/build-push-action@v5
+           with:
+             context: .
+             push: true
+             tags: ${{ steps.meta.outputs.tags }}
+             labels: ${{ steps.meta.outputs.labels }}
+   ```
+3. Simpan perubahan (`Ctrl + O`, `Enter`, `Ctrl + X`), lalu verifikasi keberadaan dan struktur berkas pipeline:
    ```bash
    ls -la .github/workflows/
    head -n 12 .github/workflows/ci-cd.yml
@@ -160,12 +231,18 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah GitHub CLI, Gi
    ![Status Workflow GitHub Actions](../assets/modul-10/03_github_actions_workflow.png)
    *Gambar 4. Tampilan antarmuka GitHub Actions berstatus centang hijau (All checks passed).*
 
-4. Setelah semua job bertanda centang hijau, buka terminal dan uji pengunduhan image yang berhasil diterbitkan:
+4. Verifikasi bahwa image container telah otomatis terbit di GitHub Packages:
+   Buka halaman utama repositori GitHub atau profil Anda, lalu klik tab **Packages**. Anda akan melihat paket Docker image berlabel `latest` dan short SHA commit.
+
+   ![Tampilan Tab Packages di GitHub](../assets/modul-10/04_github_packages_ui.png)
+   *Gambar 5. Antarmuka GitHub Packages menampilkan container image yang berhasil diterbitkan oleh pipeline.*
+
+5. Buka terminal dan uji pengunduhan image yang berhasil diterbitkan dari GitHub Container Registry:
    ```bash
    docker pull ghcr.io/<username>/my-devops-cicd:latest
    ```
    ![Verifikasi Unduh Image dari GHCR](../assets/modul-10/05_ghcr_packages.png)
-   *Gambar 5. Mengunduh container image hasil build otomatis dari GHCR.*
+   *Gambar 6. Mengunduh container image hasil build otomatis dari GHCR.*
 
 ---
 
@@ -212,7 +289,7 @@ Tabel berikut menjelaskan rincian sintaks perintah baris perintah GitHub CLI, Gi
    Hapus tag penutup `</html>` pada file `index.html`, lalu lakukan `git commit` dan `git push` ke repositori. Amati apa yang terjadi pada tab GitHub Actions. Tunjukkan bahwa job `code-quality` berhasil mendeteksi error dan job `build-and-push` secara otomatis dibatalkan (*cancelled/blocked*).
    
    ![Simulasi Kegagalan Pipeline GitHub Actions](../assets/modul-10/06_broken_build_ci_alert.png)
-   *Gambar 6. Simulasi mekanisme fail-fast: kegagalan tahap CI membatalkan otomatis tahap build & push.*
+   *Gambar 7. Simulasi mekanisme fail-fast: kegagalan tahap CI membatalkan otomatis tahap build & push.*
 
 2. **Menambahkan Multi-Environment Tagging:**  
    Modifikasi file `ci-cd.yml` agar selain menghasilkan tag `latest`, image yang dibangun juga diberi label nomor commit Git yang spesifik (`sha`).
