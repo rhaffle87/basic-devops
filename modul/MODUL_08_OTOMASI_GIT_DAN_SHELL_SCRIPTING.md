@@ -67,6 +67,27 @@ Di dalam sistem operasi berbasis UNIX/Linux, setiap file dan direktori memiliki 
 
 Skrip bash membutuhkan atribut `x` (eksekusi) agar dapat dipanggil secara langsung menggunakan path `./nama_skrip.sh`. Tanpa atribut tersebut, shell akan menolak eksekusi dengan pesan kesalahan `Permission denied`.
 
+#### 2.4 Glosarium Perintah CLI Linux & Shell Scripting (Sintaks, Akronim, dan Fungsinya)
+Tabel berikut menjelaskan rincian sintaks perintah baris perintah Linux dan automasi shell yang digunakan pada modul ini beserta kepanjangan dan fungsinya:
+
+**Tabel 3. Glosarium Perintah CLI Linux Modul 8**
+| Perintah / Sintaks | Kepanjangan / Asal Kata (Akronim) | Deskripsi dan Fungsi Utama |
+| :--- | :--- | :--- |
+| `pwd` | **P**rint **W**orking **D**irectory | Menampilkan path direktori kerja absolut di mana sesi terminal saat ini berada. |
+| `chmod` | **CH**ange **MOD**e | Mengubah izin berkas, contohnya `chmod +x` untuk menambahkan izin eksekusi skrip (*executable*). |
+| `curl` | **C**lient **URL** | Mengirim permintaan jaringan HTTP/HTTPS untuk pengujian API, download file, dan automated health check. |
+| `curl -I` | Client URL (**I**nformation Header) | Mengambil hanya baris header respons HTTP dari server target tanpa mengunduh konten body. |
+| `curl -s -o /dev/null -w "%{http_code}"` | **s**ilent, **o**utput devnull, **w**rite-out | Mengambil status kode HTTP numerik (seperti 200, 404, 502) secara senyap tanpa mencemari log terminal. |
+| `date` | **Date** and Time | Menampilkan atau memformat tanggal dan waktu sistem terkini (digunakan untuk *audit logging timestamp*). |
+| `tee` | **T**ee (Pipa Pemecah T) | Menampilkan output ke layar terminal sekaligus mencatatnya ke dalam file log secara bersamaan. |
+| `echo` | **Echo** (Gema) | Mencetak baris teks atau nilai dari variabel lingkungan (*environment variables*) ke terminal. |
+| `test` / `[ ]` | **Test** Condition | Mengevaluasi ekspresi logika; misalnya `test -f file` untuk memastikan keberadaan file reguler sebelum dideploy. |
+| `grep` | **G**lobal **R**egular **E**xpression **P**rint | Mencari baris teks di dalam berkas yang cocok dengan pola atau kata kunci tertentu. |
+| `sed` | **S**tream **ED**itor | Mengedit dan memanipulasi teks secara otomatis (*in-place string replacement*) tanpa perlu membuka teks editor. |
+| `dos2unix` | **DOS** to **UNIX** | Mengubah format baris akhir berkas teks dari standar Windows (CRLF `\r\n`) menjadi standar Linux (LF `\n`). |
+| `whoami` | **Who Am I** | Menampilkan nama pengguna (*username*) yang sedang aktif menjalankan sesi shell Linux. |
+| `set -eo pipefail` | Shell Safety Flags | Menghentikan skrip segera jika ada perintah yang gagal (`-e`) dan meneruskan error code pada pipeline (`pipefail`). |
+
 ---
 
 ### 3. Alat dan Kebutuhan Praktikum

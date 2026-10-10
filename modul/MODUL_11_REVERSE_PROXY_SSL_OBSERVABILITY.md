@@ -49,6 +49,24 @@ Observability adalah kemampuan mengukur kondisi internal sebuah sistem berdasark
 2. **Error Logs:** Merekam kegagalan sistem, crash, atau kendala timeout.
 3. **HTTP Status Code Metrics:** Indikator kesehatan layanan (2xx: Sukses, 3xx: Redirect, 4xx: Kesalahan Klien, 5xx: Kesalahan Server).
 
+#### 2.4 Glosarium Perintah CLI Jaringan, SSL/TLS, dan Observability (Sintaks, Akronim, dan Fungsinya)
+Tabel berikut menjelaskan rincian sintaks perintah baris perintah OpenSSL, cURL lanjutan, dan utilitas observabilitas jaringan pada modul ini beserta kepanjangan dan fungsinya:
+
+**Tabel 1. Glosarium Perintah CLI Modul 11**
+| Perintah / Sintaks | Kepanjangan / Asal Kata (Akronim) | Deskripsi dan Fungsi Utama |
+| :--- | :--- | :--- |
+| `openssl` | **OPEN** **S**ecure **S**ockets **L**ayer | Pustaka kriptografi serbaguna untuk enkripsi data, tanda tangan digital, dan manajemen sertifikat keamanan. |
+| `openssl req` | OpenSSL Certificate **Req**uest | Utilitas manajemen permintaan pembuatan sertifikat digital standar PKCS#10 X.509. |
+| `openssl req -x509` | **X.509** Standard Public Key Certificate | Menghasilkan sertifikat publik yang ditandatangani mandiri (*self-signed certificate*) alih-alih file permintaan CSR. |
+| `openssl -nodes` | **No** **DES** (Data Encryption Standard) | Tidak mengenkripsi berkas private key dengan passphrase sehingga web server Nginx dapat membaca kunci saat boot otomatis. |
+| `openssl -days 365` | Certificate Validity **Days** | Menetapkan masa berlaku sertifikat digital (contoh: 365 hari / 1 tahun kalender). |
+| `openssl -newkey rsa:2048` | **New** **Key** Rivest-Shamir-Adleman 2048-bit | Membuat pasangan kunci privat baru menggunakan algoritma enkripsi asimetris RSA dengan panjang kunci 2048 bit. |
+| `curl -k` / `--insecure` | Client URL Insecure (**k**ey bypass) | Mengabaikan verifikasi otoritas sertifikat SSL (berguna untuk pengujian internal pada *self-signed SSL certificate*). |
+| `curl -s` / `--silent` | Client URL **S**ilent Mode | Menyembunyikan tampilan *progress meter* dan pesan diagnostik agar output terminal tetap bersih. |
+| `awk` | **A**ho, **W**einberger, & **K**ernighan | Bahasa pemrograman pengolah teks untuk memfilter dan mengekstrak kolom data spesifik dari file log Nginx. |
+| `ss` | **S**ocket **S**tatistics | Menampilkan statistik soket jaringan lokal (pengganti modern dari `netstat` untuk mengecek port aktif). |
+| `ss -tulpn` | **t**cp, **u**dp, **l**isten, **p**rocess, **n**umeric | Menampilkan seluruh port TCP/UDP yang sedang dalam status *listening* beserta nama proses dan PID penggunanya. |
+
 ---
 
 ### 3. Alat dan Kebutuhan Praktikum

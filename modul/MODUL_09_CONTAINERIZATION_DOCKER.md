@@ -63,6 +63,34 @@ graph TD
 | `ENV <key>=<val>` | Menetapkan variabel lingkungan (*environment variables*) |
 | `CMD ["exec", "param"]` | Perintah default yang dieksekusi saat kontainer pertama kali menyala |
 
+#### 2.3 Glosarium Perintah CLI Docker dan Linux Sistem (Sintaks, Akronim, dan Fungsinya)
+Tabel berikut menjelaskan rincian sintaks perintah baris perintah Docker dan administrasi sistem yang digunakan pada modul ini beserta kepanjangan dan fungsinya:
+
+**Tabel 3. Glosarium Perintah CLI Docker & Linux Modul 9**
+| Perintah / Sintaks | Kepanjangan / Asal Kata (Akronim) | Deskripsi dan Fungsi Utama |
+| :--- | :--- | :--- |
+| `docker` | Dari istilah *dock worker* (pekerja peti kemas pelabuhan) | Platform utama untuk memaketkan, mendistribusikan, dan mengisolasi aplikasi dalam kontainer. |
+| `docker build` | Docker **Build** Image | Membaca berkas `Dockerfile` untuk merakit dan menyusun layer Docker Image baru. |
+| `docker run` | Docker **Run** Container | Membuat dan langsung menjalankan instance kontainer baru dari sebuah image tertentu. |
+| `docker run -d` | Docker Run (**d**etached) | Menjalankan kontainer di latar belakang (*background mode*) sehingga terminal tetap bebas digunakan. |
+| `docker run -p 8080:80` | Docker Run (**p**ort publish / port mapping) | Meneruskan lalu lintas dari port 8080 host ke port 80 internal kontainer. |
+| `docker run -v` | Docker Run (**v**olume / bind mount) | Menghubungkan direktori fisik host ke direktori di dalam kontainer untuk sinkronisasi data/kode. |
+| `docker ps` | Docker **P**rocess **S**tatus | Menampilkan daftar seluruh kontainer yang saat ini sedang aktif berjalan. |
+| `docker ps -a` | Docker Process Status (**a**ll) | Menampilkan seluruh kontainer di sistem, termasuk yang statusnya sudah berhenti (*exited*). |
+| `docker images` | Docker **Images** | Menampilkan daftar seluruh template image yang telah diunduh atau dibuat di mesin lokal. |
+| `docker stop` | Docker **Stop** | Mengirim sinyal `SIGTERM` untuk menghentikan proses kontainer secara tertib (*graceful shutdown*). |
+| `docker rm` | Docker **R**e**M**ove | Menghapus satu atau lebih kontainer yang sudah tidak aktif dari disk host. |
+| `docker rmi` | Docker **R**e**M**ove **I**mage | Menghapus satu atau lebih image lokal dari penyimpanan Docker. |
+| `docker exec` | Docker **EXEC**ute | Menjalankan perintah baru di dalam kontainer yang sedang berjalan (contoh: membuka shell interaktif `sh`). |
+| `docker exec -it` | Docker Execute (**i**nteractive, **t**ty) | Membuka sesi pseudo-terminal interaktif langsung ke dalam lingkungan kontainer. |
+| `docker logs` | Docker **Logs** | Mengambil output standar (*stdout/stderr*) yang dicetak oleh aplikasi di dalam kontainer. |
+| `docker stats` | Docker **Stat**istics | Menampilkan konsumsi CPU, memori (RAM), dan network I/O kontainer secara *real-time*. |
+| `docker top` | Docker **Top** (Process Table) | Menampilkan daftar proses sistem operasi yang sedang berjalan di dalam kontainer aktif. |
+| `docker compose up -d` | Docker Compose **Up** (Detached) | Membangun jaringan, volume, dan menyalakan seluruh layanan multi-kontainer sesuai deklarasi YAML. |
+| `docker compose down` | Docker Compose **Down** | Menghentikan dan membersihkan seluruh kontainer, jaringan, dan resource yang dibuat oleh Compose. |
+| `usermod` | **USER** **MOD**ify | Perintah Linux untuk memodifikasi pengaturan akun pengguna (seperti menambahkan grup `docker`). |
+| `newgrp` | **NEW** **GR**ou**P** | Memperbarui sesi shell yang sedang aktif agar mengenali keanggotaan grup pengguna yang baru ditambahkan. |
+
 ---
 
 ### 3. Alat dan Kebutuhan Praktikum

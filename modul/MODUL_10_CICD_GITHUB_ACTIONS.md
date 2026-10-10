@@ -51,6 +51,23 @@ GitHub Actions adalah platform otomatisasi alur kerja (*automation workflow*) ba
 | **Step** | Tugas individual yang dapat berupa perintah shell (`run`) atau modul terstandar (`uses`) |
 | **Action** | Modul aplikasi mandiri yang dapat digunakan kembali dari GitHub Marketplace (misal `actions/checkout@v4`) |
 
+#### 2.3 Glosarium Perintah CLI GitHub, Git, dan CI/CD (Sintaks, Akronim, dan Fungsinya)
+Tabel berikut menjelaskan rincian sintaks perintah baris perintah GitHub CLI, Git, dan utilitas pipeline otomatisasi pada modul ini beserta kepanjangan dan fungsinya:
+
+**Tabel 2. Glosarium Perintah CLI Modul 10**
+| Perintah / Sintaks | Kepanjangan / Asal Kata (Akronim) | Deskripsi dan Fungsi Utama |
+| :--- | :--- | :--- |
+| `gh` | **G**it**H**ub CLI | Alat baris perintah resmi GitHub untuk mengelola repositori, issue, PR, secrets, dan workflow langsung dari terminal. |
+| `gh repo create` | GitHub Repo **Create** | Membuat repositori baru di akun GitHub lokal atau remote dari baris perintah. |
+| `gh repo view` | GitHub Repo **View** | Memeriksa detail informasi, status branch, dan deskripsi repositori GitHub. |
+| `git rev-parse` | Git **Rev**ision **Parse** | Mengurai dan mengambil pengenal objek Git internal (contoh: `git rev-parse --short HEAD` untuk 7 digit SHA commit). |
+| `git checkout` | Git **Check Out** | Mengganti versi branch aktif atau mengembalikan file ke snapshot commit tertentu. |
+| `test -f` | **Test** Regular **F**ile | Perintah shell untuk menguji keberadaan sebuah berkas reguler (digunakan pada tahap validasi integritas CI). |
+| `grep -q` | Global Regular Expression Print (**q**uiet) | Mencari string tanpa mencetak output, hanya mengembalikan exit code 0 (ditemukan) atau 1 (tidak ditemukan). |
+| `yamllint` | **YAML** **Lint**er | Perkakas audit statis untuk mendeteksi kesalahan sintaks indentasi dan format pada berkas YAML/Workflow. |
+| `docker buildx` | Docker **Build** e**X**tended | Plugin CLI Docker untuk fitur build tingkat lanjut, multi-platform image (AMD64/ARM64), dan caching modern. |
+| `docker login` | Docker Registry **Login** | Mengautentikasi sesi terminal ke container registry (seperti Docker Hub atau `ghcr.io`) menggunakan token/password. |
+
 ---
 
 ### 3. Alat dan Kebutuhan Praktikum
