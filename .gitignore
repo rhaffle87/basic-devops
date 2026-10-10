@@ -1,0 +1,20 @@
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs & Temporary files
+*.log
+deployment.log
+
+# SSL Key and Certificate (Lab runtime generated)
+labs/lab-11-reverse-proxy/certs/*.key
+labs/lab-11-reverse-proxy/certs/*.crt
+certs/*.key
+certs/*.crt

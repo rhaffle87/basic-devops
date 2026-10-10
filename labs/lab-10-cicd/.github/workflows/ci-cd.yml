@@ -1,0 +1,68 @@
+name: Automated CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  code-quality:
+    name: Linting & Integrity Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Unduh Source Code (Checkout)
+        uses: actions/checkout@v4
+
+      - name: Validasi Integritas File
+        run: |
+          echo "=== Memeriksa keberadaan file utama ==="
+          test -f index.html || { echo "File index.html tidak ditemukan!"; exit 1; }
+          test -f Dockerfile || { echo "Dockerfile tidak ditemukan!"; exit 1; }
+          echo "File integritas: OK"
+
+      - name: Validasi HTML Sintaks Sederhana
+        run: |
+          echo "=== Menjalankan verifikasi dasar HTML ==="
+          grep -q "</html>" index.html || { echo "Tag penutup HTML tidak valid!"; exit 1; }
+          echo "Sintaks HTML: Valid"
+
+  build-and-push:
+    name: Build & Push Docker Image ke GHCR
+    needs: code-quality
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Unduh Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login ke GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Ekstrak Metadata Tagging Image
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=sha,format=short
+            type=raw,value=latest
+
+      - name: Pembangunan dan Pengunggahan Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
