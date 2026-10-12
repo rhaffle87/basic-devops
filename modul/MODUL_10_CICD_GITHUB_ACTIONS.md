@@ -23,20 +23,18 @@ Dalam praktik rekayasa perangkat lunak modern, CI/CD adalah metodologi yang bert
 2. **Continuous Delivery (CD):** Kelanjutan dari CI di mana setiap kode yang lolos pengujian otomatis dikemas menjadi artefak siap rilis (seperti Docker Image) dan siap disebarkan ke lingkungan produksi kapan saja melalui persetujuan manual (*manual gate*).
 3. **Continuous Deployment (CD):** Tahapan otomatisasi penuh di mana setiap perubahan kode yang lolos seluruh tahapan pengujian langsung disebarkan (*deploy*) ke server produksi secara otomatis tanpa intervensi manual.
 
-```mermaid
-flowchart LR
-    Dev["Developer Git Push"] --> Code["GitHub Repository"]
-    subgraph CI_Stage ["Continuous Integration (CI)"]
-        Code --> Lint["Lint & Syntax Validation"]
-        Lint --> Test["Automated Health/Security Check"]
-    end
-    subgraph CD_Stage ["Continuous Deployment (CD)"]
-        Test --> BuildDocker["Build Docker Image"]
-        BuildDocker --> PushReg["Push ke GHCR / Docker Hub"]
-        PushReg --> DeployServer["Deploy ke Production Server"]
-    end
-```
-*Gambar 1. Siklus Alur Kerja Otomasi Pipeline CI/CD*
+##### Dekomposisi Sistem & Alur Kerja Pipeline CI/CD
+1. **System Summary:** Pipeline CI/CD terotomasi penuh yang menjembatani siklus hidup rilis perangkat lunak dari commit kode hingga kontainer produksi. Sistem memanfaatkan *event-driven runners* GitHub Actions untuk menjalankan validasi integritas kualitas kode (*Continuous Integration*) dan menerbitkan image kontainer terversi ke GitHub Container Registry (*Continuous Deployment*).
+2. **Tier & Domain Breakdown:**
+   - **Source & Event Ingestion Tier:** Terminal lokal pengembang yang melakukan `git push` dan repositori remote GitHub yang memicu webhook event runner.
+   - **CI Quality Gate Tier (Job `code-quality`):** Virtual runner `ubuntu-latest` yang mengunduh source code (`actions/checkout@v4`), memverifikasi integritas berkas (`test -f index.html`), dan menguji sintaks penutup HTML (`grep -q`).
+   - **CD Build & Package Tier (Job `build-and-push`):** Runner yang mengonfigurasi Moby BuildKit (`setup-buildx-action@v3`), mengautentikasi hak akses registry via token terenkripsi (`secrets.GITHUB_TOKEN`), dan mengekstrak metadata tagging SHA/latest.
+   - **Registry & Distribution Tier:** GitHub Container Registry (`ghcr.io`) sebagai *artifact storage* terdistribusi dan server produksi tujuan penarikan image (*docker pull & run*).
+3. **Flow Dynamics:** Pengembang melakukan `git push origin main`. GitHub mendeteksi event dan memicu runner virtual. Job CI dijalankan pertama kali; apabila terjadi kegagalan (*lint failure*), mekanisme *fail-fast* membatalkan job build berikutnya secara otomatis. Jika job CI berstatus centang hijau (sukses), job CD mengambil alih kendali untuk melakukan kompilasi Dockerfile, mem-push image multi-layer ke `ghcr.io`, dan menyediakan artefak siap pakai untuk deployment server.
+
+![Siklus Alur Kerja Otomasi Pipeline CI/CD](../assets/modul-10/00_arsitektur_cicd.png)
+*Gambar 1. Siklus Alur Kerja Otomasi Pipeline CI/CD (Draw.io Production Diagram)*  
+> 📐 **Berkas Desain Asli:** Berkas skematik draw.io dapat diakses dan disunting pada [`docs/diagrams/modul_10_cicd_pipeline.drawio`](../docs/diagrams/modul_10_cicd_pipeline.drawio).
 
 #### 2.2 Arsitektur GitHub Actions
 GitHub Actions adalah platform otomatisasi alur kerja (*automation workflow*) bawaan GitHub yang mengeksekusi pipeline berdasarkan pemicu (*events*) tertentu.

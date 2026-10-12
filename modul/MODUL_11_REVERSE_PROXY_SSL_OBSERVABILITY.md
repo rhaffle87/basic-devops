@@ -20,17 +20,19 @@
 1. **Forward Proxy:** Berada di sisi klien (*client-facing*) dan bertindak sebagai perantara bagi sekumpulan klien untuk mengakses jaringan internet publik. Biasanya digunakan untuk *caching*, bypass sensor, atau filter jaringan kantor.
 2. **Reverse Proxy:** Berada di sisi server (*server-facing*) dan bertindak sebagai pintu gerbang utama (*gateway*) bagi klien luar yang ingin mengakses layanan internal. Klien tidak pernah berkomunikasi langsung dengan server aplikasi di belakang layar.
 
-```mermaid
-flowchart TD
-    Client1["Pengguna Internet / Browser"] -->|HTTPS :443| Gateway["Nginx Reverse Proxy & SSL Gateway"]
-    Gateway -->|Round-Robin :80| App1["Backend App Instance 1 (Port 8081)"]
-    Gateway -->|Round-Robin :80| App2["Backend App Instance 2 (Port 8082)"]
-    subgraph Isolated_Docker_Network ["Jaringan Internal Terisolasi (Docker Bridge)"]
-        App1
-        App2
-    end
-```
-*Gambar 1. Topologi Nginx Reverse Proxy dan Load Balancer Multi-Instance*
+##### Dekomposisi Sistem & Topologi Reverse Proxy Gateway
+1. **System Summary:** Arsitektur gerbang tepi (*edge gateway*) berstandar industri dengan pengakhiran SSL/TLS terpusat, mitigasi pengalihan HTTP ke HTTPS otomatis, load balancing round-robin, dan pencatatan log observabilitas kustom. Sistem mengisolasi kontainer backend internal dari paparan jaringan publik langsung.
+2. **Tier & Domain Breakdown:**
+   - **Client & Ingress Zone:** Peramban web pengguna luar yang mengakses endpoint melalui port HTTP 80 atau HTTPS 443 dengan enkripsi TLSv1.2 / TLSv1.3.
+   - **Nginx Edge Gateway & Security Tier (`nginx-gateway`):** Pintu gerbang utama yang menjalankan server blok port 80 (HTTP 301 Redirect ke HTTPS) dan port 443 (SSL Termination dengan sertifikat X.509 OpenSSL). Menginjeksi metadata klien (`X-Real-IP`, `X-Forwarded-Proto`) sebelum mendistribusikan beban.
+   - **Isolated Docker Network (`internal-net` bridge):** Jaringan jembatan virtual Docker yang mengisolasi komunikasi antar kontainer tanpa mempublikasikan port backend ke host secara langsung.
+   - **Upstream Application Cluster:** Dua instance server aplikasi web independen (`backend-alpha` pada `172.19.0.2:80` dan `backend-beta` pada `172.19.0.3:80`).
+   - **Observability Subsystem:** Streaming access log berformat `custom_devops` yang mencatat alamat upstream aktif, kode status respon HTTP, dan waktu pemrosesan (*latency*).
+3. **Flow Dynamics:** Ketika klien mengakses `http://localhost`, blok port 80 langsung mengembalikan respons `301 Moved Permanently` ke URL `https://localhost/`. Pada koneksi HTTPS, Nginx melakukan dekripsi TLS di level gateway, meneruskan header ke upstream pool `my_cluster`, memilih kontainer target bergantian 50:50 via algoritma round-robin, dan mencatat metrik transmisi ke `access.log`.
+
+![Topologi Nginx Reverse Proxy dan Load Balancer Multi-Instance](../assets/modul-11/00_arsitektur_reverse_proxy.png)
+*Gambar 1. Topologi Nginx Reverse Proxy dan Load Balancer Multi-Instance (Draw.io Production Diagram)*  
+> 📐 **Berkas Desain Asli:** Berkas skematik draw.io dapat diakses dan disunting pada [`docs/diagrams/modul_11_reverse_proxy_topology.drawio`](../docs/diagrams/modul_11_reverse_proxy_topology.drawio).
 
 Keuntungan arsitektur *Reverse Proxy*:
 - **Pusat Keamanan:** Seluruh enkripsi SSL/TLS dikelola di satu pintu (*SSL Termination*).

@@ -1,0 +1,35 @@
+<mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1350" pageHeight="450" background="#ffffff">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <mxCell id="m7" value="&lt;b&gt;MODUL 07&lt;/b&gt;&lt;br&gt;Linux &amp;amp; Web Server Foundations&lt;br&gt;&lt;font color=&#39;#64748b&#39;&gt;WSL2, Nginx Core, VHosts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#3b82f6;fontColor=#1e3a8a;fontSize=12;fontFamily=Helvetica;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="40" y="140" width="220" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="m8" value="&lt;b&gt;MODUL 08&lt;/b&gt;&lt;br&gt;Git &amp;amp; Shell Automation&lt;br&gt;&lt;font color=&#39;#64748b&#39;&gt;Defensive Bash, Zero-Downtime&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#22c55e;fontColor=#14532d;fontSize=12;fontFamily=Helvetica;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="300" y="140" width="220" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="m9" value="&lt;b&gt;MODUL 09&lt;/b&gt;&lt;br&gt;Docker Containerization&lt;br&gt;&lt;font color=&#39;#64748b&#39;&gt;Alpine Image, Compose Cluster&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;fontColor=#0369a1;fontSize=12;fontFamily=Helvetica;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="560" y="140" width="220" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="m10" value="&lt;b&gt;MODUL 10&lt;/b&gt;&lt;br&gt;CI/CD Pipeline Automation&lt;br&gt;&lt;font color=&#39;#64748b&#39;&gt;GitHub Actions &amp;amp; GHCR Publish&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e8ff;strokeColor=#a855f7;fontColor=#581c87;fontSize=12;fontFamily=Helvetica;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="820" y="140" width="220" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="m11" value="&lt;b&gt;MODUL 11&lt;/b&gt;&lt;br&gt;Gateway, SSL &amp;amp; Observability&lt;br&gt;&lt;font color=&#39;#64748b&#39;&gt;Reverse Proxy, LB, TLS 1.3&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef08a;strokeColor=#eab308;fontColor=#713f12;fontSize=12;fontFamily=Helvetica;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="1080" y="140" width="230" height="110" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e_7_8" edge="1" parent="1" source="m7" target="m8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#3b82f6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_8_9" edge="1" parent="1" source="m8" target="m9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#22c55e;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_9_10" edge="1" parent="1" source="m9" target="m10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#0284c7;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_10_11" edge="1" parent="1" source="m10" target="m11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#a855f7;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

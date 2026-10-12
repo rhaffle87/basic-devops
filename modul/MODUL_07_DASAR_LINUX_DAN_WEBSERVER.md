@@ -38,21 +38,18 @@ Dalam administrasi server, pemahaman struktur direktori Linux sangat penting aga
 #### 2.2 Web Server dan Nginx
 Web server adalah layanan perangkat lunak yang berfungsi menerima permintaan (*request*) berbasis protokol HTTP/HTTPS dari klien (melalui peramban web seperti Chrome, Firefox, Edge), kemudian memproses dan mengirimkan berkas respons (*response*) yang diminta (seperti HTML, CSS, JavaScript, gambar, atau data JSON).
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Client as Web Browser (Host Windows)
-    participant NginxMaster as Nginx Master Process
-    participant NginxWorker as Nginx Worker Process
-    participant Storage as Filesystem (/var/www/html)
+##### Dekomposisi Sistem & Alur Penanganan HTTP Nginx
+1. **System Summary:** Arsitektur web server Nginx mengadopsi model *asynchronous event-driven* untuk melayani permintaan berkas statis website secara non-blocking. Batasan sistem mencakup antarmuka peramban Windows host, layer daemon Nginx pada WSL2 Ubuntu, dan subsistem penyimpanan Linux *document root*.
+2. **Tier & Domain Breakdown:**
+   - **Client & Ingestion Tier:** Peramban web host (*Google Chrome / Edge*) yang menginisiasi TCP Handshake dan transmisi request HTTP/1.1.
+   - **Control & Configuration Tier:** Nginx Master Process yang mengelola sinyal Linux (*PID controller*) dan mengevaluasi konfigurasi virtual host (`/etc/nginx/sites-available/default`).
+   - **Processing & Event Core Tier:** Nginx Worker Process dengan mekanisme *event loop* (`epoll`) yang menangani koneksi konkurensi tinggi tanpa membebani memori sistem.
+   - **Persistence & Storage Tier:** Linux VFS yang menyimpan berkas statis portofolio pada direktori `/var/www/html/Portfolio-responsive`.
+3. **Flow Dynamics:** Klien mengirimkan request sinkron `HTTP GET /index.html` via port TCP 80. Socket listener Nginx meneruskannya ke Worker Process yang mencocokkan *server block* virtual host. Worker membaca berkas secara non-blocking dari media penyimpanan, memformat header HTTP (MIME type `text/html`), lalu mengirimkan payload berstatus `HTTP 200 OK` kembali ke peramban klien.
 
-    Client->>NginxWorker: HTTP GET /index.html (Port 80)
-    Note over NginxMaster,NginxWorker: Event-driven & Asynchronous
-    NginxWorker->>Storage: Baca berkas index.html
-    Storage-->>NginxWorker: Berkas biner/teks
-    NginxWorker-->>Client: HTTP 200 OK (Payload HTML)
-```
-*Gambar 1. Siklus Penanganan Permintaan HTTP pada Arsitektur Nginx*
+![Siklus Penanganan Permintaan HTTP pada Arsitektur Nginx](../assets/modul-07/00_arsitektur_nginx.png)
+*Gambar 1. Siklus Penanganan Permintaan HTTP pada Arsitektur Nginx (Draw.io Production Diagram)*  
+> 📐 **Berkas Desain Asli:** Berkas skematik draw.io dapat diakses dan disunting pada [`docs/diagrams/modul_07_nginx_architecture.drawio`](../docs/diagrams/modul_07_nginx_architecture.drawio).
 
 Nginx (*Engine-X*) merupakan salah satu web server paling populer di dunia industri karena mengadopsi arsitektur *asynchronous* dan *event-driven*. Berbeda dengan web server tradisional yang membuat satu *thread/process* baru untuk setiap satu koneksi, Nginx menggunakan:
 1. **Master Process:** Bertugas membaca konfigurasi, mengelola port socket, dan memonitor worker processes.

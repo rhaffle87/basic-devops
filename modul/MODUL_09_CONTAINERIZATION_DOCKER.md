@@ -21,21 +21,19 @@ Sebelum teknologi kontainer populer, pemisahan lingkungan aplikasi mengandalkan 
 
 Docker memanfaatkan fitur kernel Linux bawaan (*Control Groups/cgroups* dan *Namespaces*) untuk mengisolasi proses aplikasi secara langsung pada tingkat sistem operasi host tanpa memerlukan Guest OS tambahan.
 
-```mermaid
-graph TD
-    subgraph Traditional_VM ["Virtual Machine Architecture"]
-        App1["App A"] --> GuestOS1["Guest OS"]
-        GuestOS1 --> Hypervisor["Hypervisor"]
-        Hypervisor --> HostOS1["Host OS & Hardware"]
-    end
+##### Dekomposisi Sistem & Komparasi Isolasi Komputasi
+1. **System Summary:** Komparasi mendasar antara arsitektur isolasi komputasi berbasis Virtual Machine (VM) dan Docker Container. Sistem mengontraskan pendekatan emulasi perangkat keras via Hypervisor dan duplikasi kernel Guest OS versus isolasi proses tingkat kernel menggunakan Linux Namespaces, Cgroups, dan Union Filesystem (OverlayFS).
+2. **Tier & Domain Breakdown:**
+   - **Physical Infrastructure Layer:** Sumber daya perangkat keras fisik dasar (CPU multi-core, RAM DDR4/DDR5, SSD NVMe, NIC interface).
+   - **Host Kernel & OS Layer:** Sistem operasi host (Windows 11 / WSL2 Ubuntu Linux Kernel) yang menyediakan pustaka *system calls* dasar.
+   - **Hypervisor vs Docker Engine Tier:** Type-2 Hypervisor (VirtualBox / VMware) yang mengemulasikan virtual CPU/BIOS vs Docker Engine daemon (`containerd` & `runc`) yang mengorkestrasi isolasi proses.
+   - **Guest OS vs Layered Image Isolation:** Guest OS utuh bermuatan gigabytes (kernel, bootloader, daemon latar belakang) vs Image Docker berbasis Nginx Alpine berukuran sangat ringan (<25 MB).
+   - **Application Runtime Tier:** Aplikasi yang berjalan di atas pustaka biner mandiri.
+3. **Flow Dynamics:** Pada VM, instruksi CPU aplikasi harus diterjemahkan melalui Guest OS kernel, diteruskan ke Hypervisor, lalu ke Host OS kernel (overhead 15-30% dengan booting hitungan menit). Pada Docker Container, aplikasi berkomunikasi langsung ke Shared Linux Kernel host melalui *system calls* terisolasi tanpa perantara hypervisor, menghasilkan performa mendekati *bare-metal* dengan startup waktu sub-detik.
 
-    subgraph Docker_Container ["Docker Container Architecture"]
-        App2["App A"] --> DockerEngine["Docker Engine (Container Runtime)"]
-        App3["App B"] --> DockerEngine
-        DockerEngine --> HostKernel["Shared Host Kernel & Hardware"]
-    end
-```
-*Gambar 1. Perbandingan Arsitektur Virtual Machine vs Docker Container*
+![Perbandingan Arsitektur Virtual Machine vs Docker Container](../assets/modul-09/00_arsitektur_docker.png)
+*Gambar 1. Perbandingan Arsitektur Virtual Machine vs Docker Container (Draw.io Production Diagram)*  
+> 📐 **Berkas Desain Asli:** Berkas skematik draw.io dapat diakses dan disunting pada [`docs/diagrams/modul_09_docker_architecture.drawio`](../docs/diagrams/modul_09_docker_architecture.drawio).
 
 **Tabel 1. Perbandingan VM vs Docker Container**
 | Parameter | Virtual Machine (VM) | Docker Container |

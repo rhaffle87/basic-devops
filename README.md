@@ -6,13 +6,9 @@ Repositori resmi materi pelatihan internal dan panduan laboratorium **Basic DevO
 
 ## 📚 Peta Kurikulum Pelatihan
 
-```mermaid
-flowchart LR
-    M7["Modul 7<br/>Linux & Nginx Manual"] --> M8["Modul 8<br/>Git & Shell Automation"]
-    M8 --> M9["Modul 9<br/>Docker Containerization"]
-    M9 --> M10["Modul 10<br/>CI/CD GitHub Actions"]
-    M10 --> M11["Modul 11<br/>Reverse Proxy, SSL & Observability"]
-```
+![Peta Kurikulum Pelatihan Basic DevOps](assets/kurikulum_devops_roadmap.png)
+*Roadmap Kurikulum Pelatihan Basic DevOps (Draw.io Production Diagram)*  
+> 📐 **Berkas Desain Asli:** Berkas skematik draw.io dapat diakses dan disunting pada [`docs/diagrams/curriculum_roadmap.drawio`](docs/diagrams/curriculum_roadmap.drawio).
 
 | Modul | Topik Materi | Dokumen Panduan | Direktori Praktikum |
 | :---: | :--- | :--- | :--- |
@@ -30,13 +26,21 @@ flowchart LR
 basic-devops/
 ├── .gitignore                                            # Konfigurasi pengabaian file Git
 ├── README.md                                             # Dokumentasi utama kurikulum
-├── assets/                                               # Tangkapan layar visual terminal CLI & antarmuka web
-│   ├── modul-07/                                         # Tangkapan layar langkah Modul 7 (16 gambar)
-│   ├── modul-08/                                         # Tangkapan layar terminal & browser Modul 8 (9 gambar)
-│   ├── modul-09/                                         # Tangkapan layar Docker container Modul 9 (8 gambar)
-│   ├── modul-10/                                         # Tangkapan layar GitHub Actions & GHCR Modul 10 (6 gambar)
-│   └── modul-11/                                         # Tangkapan layar SSL, Proxy & Logs Modul 11 (9 gambar)
-├── docs/                                                 # Dokumentasi & arsip referensi
+├── assets/                                               # Tangkapan layar visual terminal CLI, peramban & diagram Draw.io
+│   ├── kurikulum_devops_roadmap.png                      # Diagram roadmap kurikulum DevOps
+│   ├── modul-07/                                         # Diagram arsitektur & screenshot langkah Modul 7
+│   ├── modul-08/                                         # Diagram arsitektur & screenshot terminal Modul 8
+│   ├── modul-09/                                         # Diagram arsitektur & screenshot Docker Modul 9
+│   ├── modul-10/                                         # Diagram arsitektur & screenshot GitHub Actions Modul 10
+│   └── modul-11/                                         # Diagram arsitektur & screenshot SSL/Proxy Modul 11
+├── docs/                                                 # Dokumentasi, skematik & arsip referensi
+│   ├── diagrams/                                         # Berkas skematik Draw.io asli (.drawio)
+│   │   ├── curriculum_roadmap.drawio
+│   │   ├── modul_07_nginx_architecture.drawio
+│   │   ├── modul_08_deployment_pipeline.drawio
+│   │   ├── modul_09_docker_architecture.drawio
+│   │   ├── modul_10_cicd_pipeline.drawio
+│   │   └── modul_11_reverse_proxy_topology.drawio
 │   └── references/                                       # Berkas PDF asli modul pelatihan terdahulu (TNL 1-7)
 │       ├── README.md                                     # Indeks katalog modul referensi
 │       ├── MODUL 1 TNL_VLAN.pdf
