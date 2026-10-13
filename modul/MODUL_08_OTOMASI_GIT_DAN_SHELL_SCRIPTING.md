@@ -32,9 +32,20 @@ Otomasi deployment menyelesaikan masalah ini dengan mengemas seluruh langkah ope
    - **Runtime Observability Tier:** Utilitas `curl` yang melakukan HTTP health probe dan berkas `deployment.log` yang mencatat jejak audit bertanda waktu (*timestamped audit trail*).
 3. **Flow Dynamics:** Pengembang menjalankan `./deploy.sh`. Skrip memvalidasi keberadaan `index.html` dan menyelaraskan permission pembacaan `644`. Skrip memicu uji sintaks `nginx -t`; bila valid, mengirimkan sinyal `systemctl reload`. Selanjutnya probe sinkron `curl -s -o /dev/null -w "%{http_code}"` menguji status HTTP port 80. Jika bernilai 200 OK, commit hash dan status sukses dicatat ke `deployment.log`. Bila probe gagal, eksekusi dihentikan dengan sinyal `exit 1`.
 
-![Siklus Eksekusi Skrip Otomasi Deployment](../assets/modul-08/00_arsitektur_deployment.png)
-*Gambar 1. Siklus Eksekusi Skrip Otomasi Deployment dengan Defensive Error Handling (Draw.io Production Diagram)*  
-> 📐 **Berkas Desain Asli:** Berkas skematik draw.io dapat diakses dan disunting pada [`docs/diagrams/modul_08_deployment_pipeline.drawio`](../docs/diagrams/modul_08_deployment_pipeline.drawio).
+```mermaid
+flowchart TD
+    Start(["Mulai: ./deploy.sh"]) --> PreFlight{"1. Pre-flight Check:<br/>index.html ada?"}
+    PreFlight -- Tidak --> Err1["Exit 1: File Hilang"]
+    PreFlight -- Ya --> Perms["2. Set Hak Akses:<br/>chmod 644 index.html"]
+    Perms --> Syntax{"3. Uji Sintaks:<br/>nginx -t"}
+    Syntax -- Gagal --> Err2["Exit 1: Sintaks Invalid"]
+    Syntax -- Sukses --> Reload["4. Zero-Downtime:<br/>systemctl reload nginx"]
+    Reload --> Health{"5. Health Check Probe:<br/>curl http://localhost"}
+    Health -- Bukan 200 --> Err3["Exit 1: Healthcheck Gagal"]
+    Health -- 200 OK --> Audit["6. Audit Logging:<br/>Catat ke deployment.log"]
+    Audit --> End(["Deployment Sukses (Exit 0)"])
+```
+*Gambar 1. Siklus Eksekusi Skrip Otomasi Deployment dengan Defensive Error Handling*
 
 #### 2.2 Siklus Version Control dengan Git
 Git bekerja dengan melacak perubahan pada tiga area utama sebelum sebuah kode tercatat secara permanen:

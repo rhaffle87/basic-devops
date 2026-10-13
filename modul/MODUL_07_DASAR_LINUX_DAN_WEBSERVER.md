@@ -38,11 +38,6 @@ Dalam administrasi server, pemahaman struktur direktori Linux sangat penting aga
 #### 2.2 Web Server dan Nginx
 Web server adalah layanan perangkat lunak yang berfungsi menerima permintaan (*request*) berbasis protokol HTTP/HTTPS dari klien (melalui peramban web seperti Chrome, Firefox, Edge), kemudian memproses dan mengirimkan berkas respons (*response*) yang diminta (seperti HTML, CSS, JavaScript, gambar, atau data JSON).
 
-![Arsitektur Web Server Nginx](../assets/modul-07/00_arsitektur_webserver_nginx.png)
-*Gambar 1. Arsitektur Komponen Web Server Nginx dan Alur Komunikasi HTTP antara Host Windows dan WSL2 Ubuntu*
-
-> **Diagram Arsitektur Draw.io**: Berkas diagram vektor dapat disunting langsung di [`assets/modul-07/00_arsitektur_webserver_nginx.drawio`](../assets/modul-07/00_arsitektur_webserver_nginx.drawio) atau dibuka langsung via [Draw.io Online Editor (Force Light Theme)](https://app.diagrams.net/?dark=0&url=https://raw.githubusercontent.com/rhaffle87/basic-devops/main/assets/modul-07/00_arsitektur_webserver_nginx.drawio).
-
 ```mermaid
 sequenceDiagram
     autonumber
@@ -57,7 +52,7 @@ sequenceDiagram
     Storage-->>NginxWorker: Berkas biner/teks
     NginxWorker-->>Client: HTTP 200 OK (Payload HTML)
 ```
-*Siklus Penanganan Permintaan HTTP pada Nginx (Sequence Diagram)*
+*Gambar 1. Siklus Penanganan Permintaan HTTP pada Arsitektur Nginx*
 
 Nginx (*Engine-X*) merupakan salah satu web server paling populer di dunia industri karena mengadopsi arsitektur *asynchronous* dan *event-driven*. Berbeda dengan web server tradisional yang membuat satu *thread/process* baru untuk setiap satu koneksi, Nginx menggunakan:
 1. **Master Process:** Bertugas membaca konfigurasi, mengelola port socket, dan memonitor worker processes.

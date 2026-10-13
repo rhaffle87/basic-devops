@@ -30,9 +30,46 @@
    - **Observability Subsystem:** Streaming access log berformat `custom_devops` yang mencatat alamat upstream aktif, kode status respon HTTP, dan waktu pemrosesan (*latency*).
 3. **Flow Dynamics:** Ketika klien mengakses `http://localhost`, blok port 80 langsung mengembalikan respons `301 Moved Permanently` ke URL `https://localhost/`. Pada koneksi HTTPS, Nginx melakukan dekripsi TLS di level gateway, meneruskan header ke upstream pool `my_cluster`, memilih kontainer target bergantian 50:50 via algoritma round-robin, dan mencatat metrik transmisi ke `access.log`.
 
-![Topologi Nginx Reverse Proxy dan Load Balancer Multi-Instance](../assets/modul-11/00_arsitektur_reverse_proxy.png)
-*Gambar 1. Topologi Nginx Reverse Proxy dan Load Balancer Multi-Instance (Draw.io Production Diagram)*  
-> 📐 **Berkas Desain Asli:** Berkas skematik draw.io dapat diakses dan disunting pada [`docs/diagrams/modul_11_reverse_proxy_topology.drawio`](../docs/diagrams/modul_11_reverse_proxy_topology.drawio).
+```mermaid
+flowchart TD
+    subgraph ClientZone ["Ingress & Client Zone"]
+        Client["Web Client / Browser"]
+    end
+
+    subgraph EdgeGateway ["Nginx Edge Gateway (Port 80 / 443)"]
+        HTTPRedirect["Port 80 (HTTP)<br/>301 Redirect to HTTPS"]
+        SSLTerm["Port 443 (HTTPS)<br/>SSL/TLS Termination"]
+        LB["Round Robin Upstream Router<br/>upstream my_cluster"]
+    end
+
+    subgraph InternalNet ["Isolated Docker Bridge (internal-net)"]
+        BackendA["backend-alpha<br/>Nginx Container 1<br/>Port 80"]
+        BackendB["backend-beta<br/>Nginx Container 2<br/>Port 80"]
+    end
+
+    subgraph LoggingSubsystem ["Observability & Logging"]
+        AccessLog["Access Log (/var/log/nginx/access.log)<br/>Format: custom_devops<br/>Upstream IP + Status + Latency"]
+    end
+
+    Client -->|HTTP :80| HTTPRedirect
+    HTTPRedirect -->|Redirect 301| Client
+    Client -->|HTTPS :443| SSLTerm
+    SSLTerm --> LB
+    LB -->|50% Traffic| BackendA
+    LB -->|50% Traffic| BackendB
+    LB -.->|Stream Metrics| AccessLog
+
+    classDef client fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0f172a;
+    classDef gateway fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#0f172a;
+    classDef cluster fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#0f172a;
+    classDef obs fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#0f172a;
+
+    class Client client;
+    class HTTPRedirect,SSLTerm,LB gateway;
+    class BackendA,BackendB cluster;
+    class AccessLog obs;
+```
+*Gambar 1. Topologi Nginx Reverse Proxy dan Load Balancer Multi-Instance*
 
 Keuntungan arsitektur *Reverse Proxy*:
 - **Pusat Keamanan:** Seluruh enkripsi SSL/TLS dikelola di satu pintu (*SSL Termination*).

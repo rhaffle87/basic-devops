@@ -31,9 +31,28 @@ Docker memanfaatkan fitur kernel Linux bawaan (*Control Groups/cgroups* dan *Nam
    - **Application Runtime Tier:** Aplikasi yang berjalan di atas pustaka biner mandiri.
 3. **Flow Dynamics:** Pada VM, instruksi CPU aplikasi harus diterjemahkan melalui Guest OS kernel, diteruskan ke Hypervisor, lalu ke Host OS kernel (overhead 15-30% dengan booting hitungan menit). Pada Docker Container, aplikasi berkomunikasi langsung ke Shared Linux Kernel host melalui *system calls* terisolasi tanpa perantara hypervisor, menghasilkan performa mendekati *bare-metal* dengan startup waktu sub-detik.
 
-![Perbandingan Arsitektur Virtual Machine vs Docker Container](../assets/modul-09/00_arsitektur_docker.png)
-*Gambar 1. Perbandingan Arsitektur Virtual Machine vs Docker Container (Draw.io Production Diagram)*  
-> 📐 **Berkas Desain Asli:** Berkas skematik draw.io dapat diakses dan disunting pada [`docs/diagrams/modul_09_docker_architecture.drawio`](../docs/diagrams/modul_09_docker_architecture.drawio).
+```mermaid
+flowchart TD
+    subgraph VM["Virtual Machine Architecture"]
+        direction TB
+        AppVM["Aplikasi 1 & 2"]
+        BinsVM["Bins / Libraries"]
+        GuestOS["Guest OS (Full Kernel GB)"]
+        Hypervisor["Hypervisor (Type 1/2)"]
+        HostVM["Host OS & Hardware"]
+        AppVM --> BinsVM --> GuestOS --> Hypervisor --> HostVM
+    end
+
+    subgraph Docker["Docker Container Architecture"]
+        direction TB
+        AppDoc["Kontainer Web (App)"]
+        BinsDoc["Bins / Libs (Alpine MB)"]
+        Engine["Docker Engine"]
+        HostDoc["Shared Host Linux Kernel"]
+        AppDoc --> BinsDoc --> Engine --> HostDoc
+    end
+```
+*Gambar 1. Perbandingan Arsitektur Virtual Machine vs Docker Container*
 
 **Tabel 1. Perbandingan VM vs Docker Container**
 | Parameter | Virtual Machine (VM) | Docker Container |

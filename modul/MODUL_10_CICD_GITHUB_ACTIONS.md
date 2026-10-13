@@ -32,9 +32,21 @@ Dalam praktik rekayasa perangkat lunak modern, CI/CD adalah metodologi yang bert
    - **Registry & Distribution Tier:** GitHub Container Registry (`ghcr.io`) sebagai *artifact storage* terdistribusi dan server produksi tujuan penarikan image (*docker pull & run*).
 3. **Flow Dynamics:** Pengembang melakukan `git push origin main`. GitHub mendeteksi event dan memicu runner virtual. Job CI dijalankan pertama kali; apabila terjadi kegagalan (*lint failure*), mekanisme *fail-fast* membatalkan job build berikutnya secara otomatis. Jika job CI berstatus centang hijau (sukses), job CD mengambil alih kendali untuk melakukan kompilasi Dockerfile, mem-push image multi-layer ke `ghcr.io`, dan menyediakan artefak siap pakai untuk deployment server.
 
-![Siklus Alur Kerja Otomasi Pipeline CI/CD](../assets/modul-10/00_arsitektur_cicd.png)
-*Gambar 1. Siklus Alur Kerja Otomasi Pipeline CI/CD (Draw.io Production Diagram)*  
-> 📐 **Berkas Desain Asli:** Berkas skematik draw.io dapat diakses dan disunting pada [`docs/diagrams/modul_10_cicd_pipeline.drawio`](../docs/diagrams/modul_10_cicd_pipeline.drawio).
+```mermaid
+flowchart LR
+    Dev["Developer<br/>git push main"] --> Trigger{"Event:<br/>Push to main"}
+    Trigger --> CI["Job: Code Quality<br/>(Ubuntu Runner)"]
+    subgraph CI_Job["Continuous Integration (CI)"]
+        CI --> Test["• actions/checkout<br/>• File Integrity (test -f)<br/>• HTML Syntax Lint"]
+    end
+    Test -- Fail --> Block["Fail-Fast Alert<br/>(Build Ditolak)"]
+    Test -- Pass --> CD["Job: Build & Push<br/>(Docker Buildx)"]
+    subgraph CD_Job["Continuous Delivery (CD)"]
+        CD --> Build["• Docker BuildKit<br/>• Tagging SHA/latest<br/>• GHCR Push"]
+    end
+    Build --> GHCR[("GHCR Registry<br/>ghcr.io/user/repo")]
+```
+*Gambar 1. Siklus Alur Kerja Otomasi Pipeline CI/CD*
 
 #### 2.2 Arsitektur GitHub Actions
 GitHub Actions adalah platform otomatisasi alur kerja (*automation workflow*) bawaan GitHub yang mengeksekusi pipeline berdasarkan pemicu (*events*) tertentu.
