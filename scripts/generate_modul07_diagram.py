@@ -116,14 +116,15 @@ def generate_modul07_diagram():
 
     # ================= ROW 3: WSL2 CONTAINER =================
     cnt_x, cnt_y, cnt_w, cnt_h = 130, 330, 900, 540
-    draw.rounded_rectangle([(cnt_x, cnt_y), (cnt_x + cnt_w, cnt_y + cnt_h)], radius=8, fill='#f8fafc', outline='#334155', width=2)
+    draw.rounded_rectangle([(cnt_x, cnt_y), (cnt_x + cnt_w, cnt_y + cnt_h)], radius=8, fill='#f8fafc', outline='#cbd5e1', width=2)
     
-    # Header bar
-    draw.rounded_rectangle([(cnt_x, cnt_y), (cnt_x + cnt_w, cnt_y + 36)], radius=8, fill='#1e293b')
-    draw.rectangle([(cnt_x, cnt_y + 24), (cnt_x + cnt_w, cnt_y + 36)], fill='#1e293b')
+    # Pure Light Theme Header bar
+    draw.rounded_rectangle([(cnt_x, cnt_y), (cnt_x + cnt_w, cnt_y + 36)], radius=8, fill='#e2e8f0')
+    draw.rectangle([(cnt_x, cnt_y + 24), (cnt_x + cnt_w, cnt_y + 36)], fill='#e2e8f0')
+    draw.line([(cnt_x, cnt_y + 36), (cnt_x + cnt_w, cnt_y + 36)], fill='#cbd5e1', width=1)
     
     font_cnt_title = ImageFont.truetype('arialbd.ttf', 12)
-    draw.text((cnt_x + 25, cnt_y + 18), 'Windows Subsystem for Linux (WSL2) — Ubuntu 22.04 LTS Environment', fill='#ffffff', font=font_cnt_title, anchor='lm')
+    draw.text((cnt_x + 25, cnt_y + 18), 'Windows Subsystem for Linux (WSL2) — Ubuntu 22.04 LTS Environment', fill='#1e293b', font=font_cnt_title, anchor='lm')
     
     # Official OS logos in header bar (Right aligned)
     img.paste(icon_ubuntu, (cnt_x + cnt_w - 60, cnt_y + 7), icon_ubuntu)
