@@ -41,7 +41,7 @@ Web server adalah layanan perangkat lunak yang berfungsi menerima permintaan (*r
 ![Arsitektur Web Server Nginx](../assets/modul-07/00_arsitektur_webserver_nginx.png)
 *Gambar 1. Arsitektur Komponen Web Server Nginx dan Alur Komunikasi HTTP antara Host Windows dan WSL2 Ubuntu*
 
-> **Diagram Arsitektur Draw.io**: Berkas diagram vektor dapat disunting langsung di [`assets/modul-07/00_arsitektur_webserver_nginx.drawio`](../assets/modul-07/00_arsitektur_webserver_nginx.drawio) atau dibuka langsung via [Draw.io Online Editor (GitHub Sync)](https://app.diagrams.net/?url=https://raw.githubusercontent.com/rhaffle87/basic-devops/main/assets/modul-07/00_arsitektur_webserver_nginx.drawio).
+> **Diagram Arsitektur Draw.io**: Berkas diagram vektor dapat disunting langsung di [`assets/modul-07/00_arsitektur_webserver_nginx.drawio`](../assets/modul-07/00_arsitektur_webserver_nginx.drawio) atau dibuka langsung via [Draw.io Online Editor (Force Light Theme)](https://app.diagrams.net/?dark=0&url=https://raw.githubusercontent.com/rhaffle87/basic-devops/main/assets/modul-07/00_arsitektur_webserver_nginx.drawio).
 
 ```mermaid
 sequenceDiagram
